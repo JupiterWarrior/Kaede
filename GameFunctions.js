@@ -1,6 +1,7 @@
 module.exports = {
     rps, guessNumber, sleep
 }
+
 async function rps(message) {
     const rpsenum = {
         ROCK : 1,
@@ -56,6 +57,7 @@ async function rps(message) {
         }
     }
 }
+
 async function guessNumber(message) {
     const filter = m => {
         let num = Number(m.content);
@@ -80,7 +82,7 @@ async function guessNumber(message) {
                     incorrectGuessString = "Nope! Kaede's number is higher! :stuck_out_tongue_closed_eyes: ";
                 }
                 if (guessesLeft == 2) {
-                    message.channel.send(incorrectGuessString + "You only have " + guessesLeft + " more chances! <:KannaSip:683109333650899004>");
+                    message.channel.send(incorrectGuessString + "You only have 2 more chances! <:KannaSip:683109333650899004>");
                 } else if (guessesLeft == 1) {
                     message.channel.send(incorrectGuessString + "This is your final chance! <:KannaSip:683109333650899004>");
                 }
@@ -94,6 +96,7 @@ async function guessNumber(message) {
     }
     message.channel.send("Hehehe! Kaede wins! You're out of guesses <:02smug:683109333156102159>");
 }
+
 function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
