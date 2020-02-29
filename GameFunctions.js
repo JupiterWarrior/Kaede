@@ -61,7 +61,7 @@ async function rps(message) {
 async function guessNumber(message) {
     const filter = m => {
         let num = Number(m.content);
-        return m.author.id === message.author.id && num !== NaN;
+        return m.author.id === message.author.id && !isNaN(num);
     }
     message.channel.send("You have 3 chances to guess my number! It's between 1 and 10 <:tachi_smile:683109333621669912> Hehehe, you'll never guess it!");
     let guessesLeft = 3;
@@ -107,7 +107,7 @@ async function mostMath(message) {
     }
     const filter = m => {
         let num = Number(m.content);
-        return m.author.id === message.author.id && num !== NaN;
+        return m.author.id === message.author.id && !isNaN(num);
     }
     message.channel.send("Kaede wants you to answer as many math questions as possible in 30 seconds!! <:6185_No_game_no_life_1:683263289895157782>");
     const start = Date.now();
@@ -139,26 +139,27 @@ async function mostMath(message) {
             else {
                 actualAns = num1 * num2;
             }
-            let num2str = num2 > 0 ? num2.toString() : "(" + num2.toString() + ")";
+            let num2str = num2 >= 0 ? num2.toString() : "(" + num2.toString() + ")";
             message.channel.send(num1 + " " + op + " " + num2str + "?");
-            ++countTotal;
         }
         answered = false;
         try {
-            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 30000, errors: ['time']});
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 30000 + start - Date.now(), errors: ['time']});
             let answer = Number(collected.first().content);
             if (answer === actualAns) {
                 countCorrect++;
             }
+            ++countTotal;
             answered = true;
         } catch (error) {
+            break;
         }
     }
     message.channel.send("Ta-da! You got " + countCorrect + " out of " + countTotal + " questions correctly!");
-    if ((countCorrect * 100) / countTotal >= 90) {
+    if ((countCorrect * 100) / countTotal >= 90 && countTotal > 15) {
         message.channel.send("Math Genius! <:AwOo:683109333327675393> Kaede likes you! :heartbeat:");
     }
-    else if ((countCorrect * 100) / countTotal >= 80) {
+    else if ((countCorrect * 100) / countTotal >= 80 && countTotal > 10) {
         message.channel.send("Not bad at all! Kaede respects you! <:SataniaThumbsUp:683109334460268652>");
     }
     else if ((countCorrect * 100) / countTotal >= 60) {
