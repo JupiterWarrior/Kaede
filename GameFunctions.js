@@ -35,7 +35,6 @@ module.exports = {
                         break;
                     default:
                         message.channel.send("Kaede wants to play seriously!! <:4199_charlotte_ugh:683110139024113697>");
-                        draw = false;
                         break;
                 }
                 if (win === 1 || win === -2) {
@@ -47,11 +46,15 @@ module.exports = {
                     draw = false;
                 }
                 else if (win === 0) {
-                    message.channel.send("one more time!");
+                    message.channel.send("One more time!");
                 }
             } catch (error) {
                 message.channel.send("Kaede waited too long!");
+                break;
             }
         }
     }
+    ,async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
 }
