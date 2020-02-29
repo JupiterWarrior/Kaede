@@ -109,7 +109,7 @@ async function mostMath(message) {
         let num = Number(m.content);
         return m.author.id === message.author.id && num !== NaN;
     }
-    message.channel.send("Kaede wants you to answer as many math questions as possible in 30 seconds!!");
+    message.channel.send("Kaede wants you to answer as many math questions as possible in 30 seconds!! <:6185_No_game_no_life_1:683263289895157782>");
     const start = Date.now();
     var countCorrect = 0;
     var countTotal = 0;
@@ -139,10 +139,7 @@ async function mostMath(message) {
             else {
                 actualAns = num1 * num2;
             }
-            let num2str = num2.toString();
-            if (num2 < 0) {
-                num2str = "(" + num2str + ")";
-            }
+            let num2str = num2 > 0 ? num2.toString() : "(" + num2.toString() + ")";
             message.channel.send(num1 + " " + op + " " + num2str + "?");
             ++countTotal;
         }

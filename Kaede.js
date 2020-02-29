@@ -1,6 +1,7 @@
 const GameFunctions = require('./GameFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
+const ytdl = require('ytdl-core');
 const bot = new Discord.Client();
 let gameInProgress = false;
 
