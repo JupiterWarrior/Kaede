@@ -2,15 +2,14 @@ const GameFunctions = require('./GameFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
 const bot = new Discord.Client();
-let busy = false;
+let gameInProgress = false;
 
 bot.once('ready', () => {
     console.log('Kaede is at your service.');
 })
 
 bot.on('message', async message => {
-    if (!busy && message.content.substring(0, 1) === prefix) {
-        busy = true;
+    if (!gameInProgress && message.content.substring(0, 1) === prefix) {
         var firstcmd = "help"
         if (message.content.length !== 1) {
             var arr = message.content.substring(1).split(' ');
@@ -37,6 +36,7 @@ bot.on('message', async message => {
                         );
                 }
                 else {
+                    gameInProgress = true;
                     switch (arr[1]) {
                         case "rps":
                             await GameFunctions.rps(message);
@@ -48,13 +48,13 @@ bot.on('message', async message => {
                             message.channel.send("Kaede doesn't know that game!! <:illyapout:683110138235977758>");
                             break;
                     }
+                    gameInProgress = false;
                 }
                 break;
             default:
                 message.channel.send("This is not a valid command.\nType ^ or ^help for Kaede's Kawaii commands! :heart:");
                 break;
         }
-        busy = false;
     }
 })
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Bot for anime, music, mobile game stats, virtual 2D girl and lots of others ",
   "main": "Kaede.js",
-  "author": "Elbert Ng",
+  "author": "Elbert Ng & Jamie Sebastian",
   "dependencies": {
     "discord.js": "^11.5.1"
   },
