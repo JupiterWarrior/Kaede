@@ -7,7 +7,7 @@ async function rps(message) {
         PAPER : 2,
         SCISSORS : 3,
     }
-    const filter = m => (m.author.id === message.author.id) || (m.content.substring(0,1) !== "^");
+    const filter = m => m.author.id === message.author.id;
     message.channel.send("Choose your weapon to go against Kaede!! :boxing_glove:");
     let draw = true;
     while (draw) {
