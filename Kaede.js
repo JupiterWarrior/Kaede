@@ -1,6 +1,8 @@
+const GameFunctions = require('./GameFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
 const bot = new Discord.Client();
+
 bot.once('ready', () => {
     console.log('Kaede is at your service.');
 })
@@ -29,7 +31,7 @@ bot.on('message', message => {
                 else {
                     switch (arr[1]) {
                         case "rps":
-                            rps(message);
+                            GameFunctions.rps(message);
                             break;
                         default:
                             message.channel.send("Kaede doesn't know that game!! <:illyapout:683110138235977758>");
