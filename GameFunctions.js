@@ -1,7 +1,6 @@
 module.exports = {
-    rps, guessNumber, sleep
+    rps, guessNumber, sleep, mostMath
 }
-
 async function rps(message) {
     const rpsenum = {
         ROCK : 1,
@@ -38,6 +37,7 @@ async function rps(message) {
                     break;
                 default:
                     message.channel.send("Kaede wants to play seriously!! <:4199_charlotte_ugh:683110139024113697>");
+                    draw = false;
                     break;
             }
             if (win === 1 || win === -2) {
@@ -96,7 +96,81 @@ async function guessNumber(message) {
     }
     message.channel.send("Hehehe! Kaede wins! You're out of guesses <:02smug:683109333156102159>");
 }
-
 function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+async function mostMath(message) {
+    const openum = {
+        ADD : "+",
+        SUB : "-",
+        MUL : "*",
+    }
+    const filter = m => {
+        let num = Number(m.content);
+        return m.author.id === message.author.id && num !== NaN;
+    }
+    message.channel.send("Kaede wants you to answer as many math questions as possible in 30 seconds!!");
+    const start = Date.now();
+    var countCorrect = 0;
+    var countTotal = 0;
+    let answered = true;
+    while (Date.now() - start <= 30000) {
+        let actualAns;
+        if (answered) {
+            let op = "";
+            let num = Math.ceil(Math.random() * 3);
+            if (num === 1) {
+                op = "+";
+            }
+            else if (num === 2) {
+                op = "-";
+            }
+            else {
+                op = "*";
+            }
+            let num1 = Math.ceil(Math.random() * 18) - 9;
+            let num2 = Math.ceil(Math.random() * 18) - 9;
+            if (op === openum.ADD) {
+                actualAns = num1 + num2;
+            }
+            else if (op === openum.SUB) {
+                actualAns = num1 - num2;
+            }
+            else {
+                actualAns = num1 * num2;
+            }
+            let num2str = num2.toString();
+            if (num2 < 0) {
+                num2str = "(" + num2str + ")";
+            }
+            message.channel.send(num1 + " " + op + " " + num2str + "?");
+            ++countTotal;
+        }
+        answered = false;
+        try {
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 30000, errors: ['time']});
+            let answer = Number(collected.first().content);
+            if (answer === actualAns) {
+                countCorrect++;
+            }
+            answered = true;
+        } catch (error) {
+        }
+    }
+    message.channel.send("Ta-da! You got " + countCorrect + " out of " + countTotal + " questions correctly!");
+    if ((countCorrect * 100) / countTotal >= 90) {
+        message.channel.send("Math Genius! <:AwOo:683109333327675393> Kaede likes you! :heartbeat:");
+    }
+    else if ((countCorrect * 100) / countTotal >= 80) {
+        message.channel.send("Not bad at all! Kaede respects you! <:SataniaThumbsUp:683109334460268652>");
+    }
+    else if ((countCorrect * 100) / countTotal >= 60) {
+        message.channel.send("<:KannaWhat:683109333331869703> Kaede expected more from you!")
+    }
+    else if ((countCorrect * 100) / countTotal >= 50) {
+        message.channel.send("At least you passed! <:akkoShrug:683109333399109638>")
+    }
+    else {
+        message.channel.send("Kaede's very disappointed in you! Kaede no like you! <:4199_charlotte_ugh:683110139024113697>")
+    }
 }

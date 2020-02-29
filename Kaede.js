@@ -31,7 +31,7 @@ bot.on('message', async message => {
                         "What game do you want to play? Type `^play [gameCMD]` to play the game.\n" +
                         ">>> Rock, paper & scissors; `= rps`\n" + 
                         "Guess the number; `= guess`\n" + 
-                        "hi\n" +
+                        "Answer most math questions; `= mm`\n" +
                         "hi"
                         );
                 }
@@ -43,6 +43,9 @@ bot.on('message', async message => {
                             break;
                         case "guess":
                             await GameFunctions.guessNumber(message);
+                            break;
+                        case "mm" :
+                            await GameFunctions.mostMath(message);
                             break;
                         default:
                             message.channel.send("Kaede doesn't know that game!! <:illyapout:683110138235977758>");
