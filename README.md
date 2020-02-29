@@ -1,0 +1,2 @@
+# Kaede
+Bot in discord
