@@ -10,7 +10,7 @@ bot.once('ready', () => {
 })
 
 bot.on('message', async message => {
-    if (!gameInProgress && message.content.substring(0, 1) === prefix) {
+    if (!gameInProgress && message.content.substring(0, 1) === prefix && !message.author.bot) {
         var firstcmd = "help"
         if (message.content.length !== 1) {
             var arr = message.content.substring(1).split(' ');
@@ -53,6 +53,12 @@ bot.on('message', async message => {
                             break;
                     }
                     gameInProgress = false;
+                }
+                break;
+            case "music":
+                if (arr.length === 1) {
+                    message.channel.send("Welcome to Kaede's music mode! Here is list of commands you can do!\n" +
+                    "");
                 }
                 break;
             default:
