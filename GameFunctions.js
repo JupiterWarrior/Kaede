@@ -63,7 +63,7 @@ async function guessNumber(message) {
         let num = Number(m.content);
         return m.author.id === message.author.id && !isNaN(num);
     }
-    message.channel.send("You have 3 chances to guess my number! It's between 1 and 10 <:tachi_smile:683109333621669912> Hehehe, you'll never guess it!");
+    message.channel.send("You have 3 chances to guess Kaede's number! It's between 1 and 10 <:tachi_smile:683109333621669912> Hehehe, you'll never guess it!");
     let guessesLeft = 3;
     let correctNumber = Math.floor(Math.random() * 10 + 1);
     while (guessesLeft > 0) {
@@ -77,9 +77,9 @@ async function guessNumber(message) {
                     message.channel.send("Whaaat, how did you know? <:illyapout:683110138235977758>")
                     return;
                 } else if (numberGuess > correctNumber) {
-                    incorrectGuessString = "Nope! Kaede's number is lower! :stuck_out_tongue_closed_eyes: ";
+                    incorrectGuessString = "Nope! Kaede's number is lower! :stuck_out_tongue_closed_eyes:";
                 } else {
-                    incorrectGuessString = "Nope! Kaede's number is higher! :stuck_out_tongue_closed_eyes: ";
+                    incorrectGuessString = "Nope! Kaede's number is higher! :stuck_out_tongue_closed_eyes:";
                 }
                 if (guessesLeft == 2) {
                     message.channel.send(incorrectGuessString + "You only have 2 more chances! <:KannaSip:683109333650899004>");
@@ -94,7 +94,7 @@ async function guessNumber(message) {
             return;
         }
     }
-    message.channel.send("Hehehe! Kaede wins! You're out of guesses <:02smug:683109333156102159>");
+    message.channel.send("Hehehe! Kaede wins! You're out of guesses <:02smug:683109333156102159> Kaede's number is " + correctNumber + "!");
 }
 function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
