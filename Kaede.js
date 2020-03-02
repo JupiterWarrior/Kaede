@@ -1,12 +1,22 @@
-const GameFunctions = require('./GameFunctions.js');
+const GameFunctions = require('./GameFunctions.js'); // modules included and global variables defined.
+const MusicFunctions = require('./MusicFunctions.js');
+const MiscFunctions = require('./MiscFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
-const ytdl = require('ytdl-core');
 const bot = new Discord.Client();
 let gameInProgress = false;
+const queue = new Map();
 
+/* bot properties when bot is on */
 bot.once('ready', () => {
-    console.log('Kaede is at your service.');
+    console.log('Kaede is at your service.'); 
+    bot.user.setPresence({
+        status: "online",
+        game : {
+            name : "^help",
+            type : "PLAYING",
+        }
+    }); 
 })
 
 bot.on('message', async message => {
@@ -59,6 +69,17 @@ bot.on('message', async message => {
                 if (arr.length === 1) {
                     message.channel.send("Welcome to Kaede's music mode! Here is list of commands you can do!\n" +
                     "");
+                }
+                else {
+                    const serverQueue = queue.get(message.guild.id);
+                    switch (arr[1]) {
+                        case "play":
+                            MusicFunctions.play(message, serverQueue, queue);
+                            break;
+                        default:
+                            message.channel.send("This command is not in Kaede's music commands!!");
+                            break;
+                    }
                 }
                 break;
             default:

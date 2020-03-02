@@ -1,6 +1,9 @@
 module.exports = {
-    rps, guessNumber, sleep, mostMath
+    rps, guessNumber, mostMath
 }
+
+const MiscFunctions = require('./MiscFunctions.js');
+
 async function rps(message) {
     const rpsenum = {
         ROCK : 1,
@@ -24,7 +27,7 @@ async function rps(message) {
                 message.channel.send("scissors!");
             }
             let win = 3;
-            await sleep(800);
+            await MiscFunctions.sleep(800);
             switch (collected.first().content.toLowerCase()) {
                 case "rock":
                     win = kaedechoice - rpsenum.ROCK;
@@ -96,9 +99,7 @@ async function guessNumber(message) {
     }
     message.channel.send("Hehehe! Kaede wins! You're out of guesses <:02smug:683109333156102159> Kaede's number is " + correctNumber + "!");
 }
-function sleep(milliseconds) {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
+
 async function mostMath(message) {
     const openum = {
         ADD : "+",
@@ -156,10 +157,10 @@ async function mostMath(message) {
         }
     }
     message.channel.send("Ta-da! You got " + countCorrect + " out of " + countTotal + " questions correctly!");
-    if ((countCorrect * 100) / countTotal >= 90 && countTotal > 15) {
+    if ((countCorrect * 100) / countTotal >= 90 && countTotal >= 15) {
         message.channel.send("Math Genius! <:AwOo:683109333327675393> Kaede likes you! :heartbeat:");
     }
-    else if ((countCorrect * 100) / countTotal >= 80 && countTotal > 10) {
+    else if ((countCorrect * 100) / countTotal >= 80 && countTotal >= 10) {
         message.channel.send("Not bad at all! Kaede respects you! <:SataniaThumbsUp:683109334460268652>");
     }
     else if ((countCorrect * 100) / countTotal >= 60) {
