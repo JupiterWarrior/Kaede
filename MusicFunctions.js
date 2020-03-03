@@ -48,8 +48,8 @@ async function play(message, serverQueue, queue) {
         }
     }
     else {
-        serverQueue.songs.push(vid);
-        message.channel.send("Kaede has added " + vid.title + " has been added to the queue!");
+        serverQueue.songs.push(songData);
+        message.channel.send("Kaede has added " + songData.title + " has been added to the queue!");
     }
 }
 async function dispatchSong(message, song, queue) {
