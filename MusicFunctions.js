@@ -58,10 +58,20 @@ async function dispatchSong(message, song, queue) {
     const serverQueue = queue.get(message.guild.id);
 
     if (!song) {
-        serverQueue.voiceChannel.leave();
-        queue.delete(message.guild.id);
-        message.channel.send("Kaede's bored.. Leaving now!");
-        return;
+        const filter = m => {
+            let theMessage = m.content.toLowerCase();
+            return theMessage.startsWith("^music play ");
+        }
+        try {
+            let collectedMessage = await message.channel.awaitMessages(filter, {max: 1, time : 60000, errors : ['time']});
+            play(collectedMessage.first(), serverQueue, queue);
+        } catch (error) {
+            console.log(error);
+            serverQueue.voiceChannel.leave();
+            queue.delete(message.guild.id);
+            message.channel.send("Kaede's bored.. Leaving now!");
+            return;
+        }
     }
     const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
         serverQueue.songs.shift();
@@ -75,25 +85,40 @@ async function dispatchSong(message, song, queue) {
 async function skip(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip unless you're in a voice channel !");
+        return;
     }
     if (!serverQueue) {
         message.channel.send("There's no song for Kaede to skip!");
+        return;
     }
     serverQueue.connection.dispatcher.end();
     message.channel.send("Kaede Skip!")
 }
-async function skipAll() {
-
+async function skipAll(message, serverQueue) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue) {
+        message.channel.send("There's no song for Kaede to skip!");
+        return;
+    }
+    serverQueue.songs = [];
+    serverQueue.connection.dispatcher.end();
+    message.channel.send("Kaede skip all!");
 }
 async function pause(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot pause unless you're in a voice channel !");
+        return;
     }
     if (!serverQueue) {
         message.channel.send("No song is playing!");
+        return;
     }
     if (!serverQueue.playing) {
         message.channel.send("Kaede paused already!");
+        return;
     }
     serverQueue.connection.dispatcher.pause();
     serverQueue.playing = !serverQueue.connection.dispatcher.paused;
@@ -102,12 +127,15 @@ async function pause(message, serverQueue) {
 async function resume(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot resume unless you're in a voice channel !");
+        return;
     }
     if (!serverQueue) {
         message.channel.send("No song is playing!");
+        return;
     }
     if (serverQueue.playing) {
         message.channel.send("Kaede is playing music already!");
+        return;
     }
     serverQueue.connection.dispatcher.resume();
     serverQueue.playing = !serverQueue.connection.dispatcher.paused;

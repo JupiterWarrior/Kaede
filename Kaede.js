@@ -89,6 +89,9 @@ bot.on('message', async message => {
                         case "resume":
                             MusicFunctions.resume(message, serverQueue);
                             break;
+                        case "skipall":
+                            MusicFunctions.skipAll(message, serverQueue);
+                            break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");
                             break;
