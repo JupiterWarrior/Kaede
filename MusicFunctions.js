@@ -18,13 +18,11 @@ async function play(message, serverQueue, queue) {
     if (!permissions.has('SPEAK')) {
         message.channel.send('Kaede is not allowed to speak in the voice channel!');
     }
-    message.channel.send("getinfo start " + Date.now());
     const songInfo = await getInfo(song);
     const songData = {
         title : songInfo.items[0].title,
         url : songInfo.items[0].webpage_url,
     };
-    message.channel.send("getinfo stop " + Date.now());
     /* console.log(songData.url);
     console.log(songData.title); */
     if (typeof serverQueue === "undefined") {
@@ -40,13 +38,9 @@ async function play(message, serverQueue, queue) {
         queueFields.songs.push(songData);
         message.channel.send("Kaede has added " + songData.title + " to the queue!");
         try {
-            message.channel.send("join start " + Date.now());
             var connection = await voiceChannel.join();
-            message.channel.send("join stop " + Date.now());
             queueFields.connection = connection;
-            message.channel.send("dispatch start " + Date.now());
             dispatchSong(message, queueFields.songs[0], queue); 
-            message.channel.send("dispatch stop " + Date.now());
         } catch (err) {
             //console.log(err);
             queue.delete(message.guild.id);
@@ -119,3 +113,23 @@ async function resume(message, serverQueue) {
     serverQueue.playing = !serverQueue.connection.dispatcher.paused;
     message.channel.send("Kaede resume!");
 }
+/*To do music commands:
+Optimize play ( kaede leaves too soon )
+Skipall ( skips all song but kaede stays in connection )
+queue ( show the queue of songs )
+np (show what song is currently playing)
+Repeat ( repeat curr song once)
+loop (repeat curr song forever)
+swap (change the orders of song)
+first (make a song to go to the first order)
+Remove ( remove a certain song in queue )
+Lyrics ( lyrics for song )
+MoveTo ( move to a certain time in the youtube vid )
+// playlist commands ( playlists are stored in json file for certain diff servers.)
+Playlist ( creates a playlist )
+Shuffle ( shuffles the playlist )
+add (adding to playlist)
+remove (from playlist)
+list (show playlist)
+playlists (show all playlists in server)
+*/
