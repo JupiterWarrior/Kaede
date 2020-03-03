@@ -56,8 +56,11 @@ bot.on('message', async message => {
                         case "guess":
                             await GameFunctions.guessNumber(message);
                             break;
-                        case "mm" :
+                        case "mm":
                             await GameFunctions.mostMath(message);
+                            break;
+                        case "bjack":
+                            await GameFunctions.blackJack(message);
                             break;
                         default:
                             message.channel.send("Kaede doesn't know that game!! <:illyapout:683110138235977758>");

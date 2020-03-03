@@ -18,13 +18,11 @@ async function play(message, serverQueue, queue) {
     if (!permissions.has('SPEAK')) {
         message.channel.send('Kaede is not allowed to speak in the voice channel!');
     }
-    message.channel.send("getinfo start " + Date.now());
     const songInfo = await getInfo(song);
     const songData = {
         title : songInfo.items[0].title,
         url : songInfo.items[0].webpage_url,
     };
-    message.channel.send("getinfo stop " + Date.now());
     /* console.log(songData.url);
     console.log(songData.title); */
     if (typeof serverQueue === "undefined") {
