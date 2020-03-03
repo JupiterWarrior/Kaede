@@ -1,5 +1,5 @@
 module.exports = {
-    rps, guessNumber, mostMath
+    rps, guessNumber, mostMath, blackJack
 }
 
 const MiscFunctions = require('./MiscFunctions.js');
@@ -223,4 +223,8 @@ async function mostMath(message) {
     else {
         message.channel.send("Kaede's very disappointed in you! Kaede no like you! <:4199_charlotte_ugh:683110139024113697>")
     }
+}
+
+async function blackJack(message) {
+
 }
