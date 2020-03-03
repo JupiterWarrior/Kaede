@@ -4,6 +4,7 @@ const MiscFunctions = require('./MiscFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
 const bot = new Discord.Client();
+const fs = require('fs');
 let gameInProgress = false;
 const queue = new Map();
 
@@ -31,10 +32,10 @@ bot.on('message', async message => {
         }
         switch (firstcmd) {
             case "help":
-                message.channel.send("in");
+                message.channel.send("in progress");
                 break;
             case "test":
-                message.channel.send("hello");
+                message.channel.send("hellooo <3");
                 break;
             case "play":
                 if (arr.length === 1) {
@@ -43,7 +44,7 @@ bot.on('message', async message => {
                         ">>> Rock, paper & scissors; `= rps`\n" + 
                         "Guess the number; `= guess`\n" + 
                         "Answer most math questions; `= mm`\n" +
-                        "hi"
+                        "Best Game Incoming..."
                         );
                 }
                 else {
@@ -76,11 +77,33 @@ bot.on('message', async message => {
                         case "play":
                             MusicFunctions.play(message, serverQueue, queue);
                             break;
+                        case "skip":
+                            MusicFunctions.skip(message, queue);
+                            break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");
                             break;
                     }
                 }
+                break;
+            case "profile":
+                fs.readFile('KaedeGameStats.json', 'utf8', (error, data) => {
+                    if (error){
+                        console.log(err);
+                    } else {
+                    gameStatsObj = JSON.parse(data);
+                        
+                    let playerId = message.author.id;
+                    if (!gameStatsObj[playerId]) {
+                        gameStatsObj[playerId] = {};
+                    }
+                    message.channel.send(message.author.username + "\n"
+                     + "Rock Paper Scissors wins: " + (gameStatsObj[playerId]["rpsWins"] ? gameStatsObj[playerId]["rpsWins"] : 0) + "\n"
+                     + "Guess Number wins: " + (gameStatsObj[playerId]["guessNumberWins"] ? gameStatsObj[playerId]["guessNumberWins"] : 0) + "\n"
+                     + "Most Math Highscore: " + (gameStatsObj[playerId]["mostMathHighscore"] ? gameStatsObj[playerId]["mostMathHighscore"] : 0) + "\n"
+                    );
+                    
+                }});
                 break;
             default:
                 message.channel.send("This is not a valid command.\nType ^ or ^help for Kaede's Kawaii commands! :heart:");

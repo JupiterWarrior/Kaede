@@ -3,6 +3,53 @@ module.exports = {
 }
 
 const MiscFunctions = require('./MiscFunctions.js');
+const fs = require('fs');
+
+async function incrementGameWins(playerId, gameStat) {
+    fs.readFile('KaedeGameStats.json', 'utf8', async (error, data) => {
+        if (error){
+            console.log(err);
+        } else {
+        gameStatsObj = JSON.parse(data);
+
+        if (!gameStatsObj[playerId]) {
+            gameStatsObj[playerId] = {};
+        }
+        if (!gameStatsObj[playerId][gameStat]) {
+            gameStatsObj[playerId][gameStat] = 0;
+        }
+        ++gameStatsObj[playerId][gameStat];
+        json = JSON.stringify(gameStatsObj);
+        fs.writeFile('KaedeGameStats.json', json, 'utf8', (error) => {
+            if (error) {
+                //console.log(error);
+            }
+        });
+    }});
+}
+
+async function checkForHighscore(playerId, newScore, gameStat) {
+    fs.readFile('KaedeGameStats.json', 'utf8', (error, data) => {
+        if (error){
+            console.log(err);
+        } else {
+        gameStatsObj = JSON.parse(data);
+
+        if (!gameStatsObj[playerId]) {
+            gameStatsObj[playerId] = {};
+        }
+        if (!gameStatsObj[playerId][gameStat]) {
+            gameStatsObj[playerId][gameStat] = 0;
+        }
+        gameStatsObj[playerId][gameStat] = Math.max(newScore, gameStatsObj[playerId][gameStat]);
+        json = JSON.stringify(gameStatsObj);
+        fs.writeFile('KaedeGameStats.json', json, 'utf8', (error) => {
+            if (error) {
+                //console.log(error);
+            }
+        });
+    }});
+}
 
 async function rps(message) {
     const rpsenum = {
@@ -49,12 +96,14 @@ async function rps(message) {
             }
             else if (win === 2 || win === -1) {
                 message.channel.send("You cheated! <:illyapout:683110138235977758>");
+                incrementGameWins(message.author.id, "rpsWins");
                 draw = false;
             }
             else if (win === 0) {
                 message.channel.send("one more time!");
             }
         } catch (error) {
+            console.log(error);
             message.channel.send("Kaede waited too long!");
             break;
         }
@@ -77,6 +126,7 @@ async function guessNumber(message) {
                 --guessesLeft;
                 let incorrectGuessString;
                 if (numberGuess === correctNumber) {
+                    incrementGameWins(message.author.id, "guessNumberWins");
                     message.channel.send("Whaaat, how did you know? <:illyapout:683110138235977758>")
                     return;
                 } else if (numberGuess > correctNumber) {
@@ -141,7 +191,7 @@ async function mostMath(message) {
                 actualAns = num1 * num2;
             }
             let num2str = num2 >= 0 ? num2.toString() : "(" + num2.toString() + ")";
-            message.channel.send(num1 + " " + op + " " + num2str + "?");
+            await message.channel.send(num1 + " " + op + " " + num2str + "?");
         }
         answered = false;
         try {
@@ -156,6 +206,7 @@ async function mostMath(message) {
             break;
         }
     }
+    checkForHighscore(message.author.id, countCorrect, "mostMathHighscore");
     message.channel.send("Ta-da! You got " + countCorrect + " out of " + countTotal + " questions correctly!");
     if ((countCorrect * 100) / countTotal >= 90 && countTotal >= 15) {
         message.channel.send("Math Genius! <:AwOo:683109333327675393> Kaede likes you! :heartbeat:");

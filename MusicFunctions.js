@@ -24,8 +24,6 @@ async function play(message, serverQueue, queue) {
         title : songInfo.items[0].title,
         url : songInfo.items[0].url,
     };
-    console.log(songData.url);
-    console.log(songData.title);
     if (typeof serverQueue === "undefined") {
         const queueFields = {
             textChannel : message.channel,
@@ -41,7 +39,7 @@ async function play(message, serverQueue, queue) {
             queueFields.connection = connection;
             dispatchSong(message, queueFields.songs[0], queue); 
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             queue.delete(message.guild.id);
             message.channel.send("Kaede found an error in playing the music!");
             return;
@@ -52,6 +50,7 @@ async function play(message, serverQueue, queue) {
         message.channel.send("Kaede has added " + songData.title + " has been added to the queue!");
     }
 }
+
 async function dispatchSong(message, song, queue) {
     const serverQueue = queue.get(message.guild.id);
 
@@ -67,12 +66,16 @@ async function dispatchSong(message, song, queue) {
         dispatchSong(message, serverQueue.songs[0], queue);
     }).on('error', () => {
         message.channel.send("Unexpected error occured!! Kaede's scared...");
-        console.error(error);
+        //console.error(error);
     });
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 }
-async function skip() {
 
+async function skip(message, queue) {
+    const serverQueue = queue.get(message.guild.id);
+    
+    serverQueue.songs.shift();
+    dispatchSong(message, serverQueue.songs[0], queue);
 }
 async function skipAll() {
 
