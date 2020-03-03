@@ -2,10 +2,10 @@ module.exports = {play, skip, skipAll}
 
 const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');
+const {getInfo} = require('ytdl-getinfo');
 
 async function play(message, serverQueue, queue) {
-    const arr = message.content.substring(12).split(' ');
-    const song = arr[0];
+    const song = message.content.substring(12);
     const voiceChannel = message.member.voiceChannel;
     if (!voiceChannel) {
         message.channel.send("Kaede cannot play music if you are not in a voice channel!");
@@ -19,11 +19,13 @@ async function play(message, serverQueue, queue) {
         message.channel.send('Kaede is not allowed to speak in the voice channel!');
     }
 
-    const songInfo = await ytdl.getInfo(song);
+    const songInfo = await getInfo(song);
     const songData = {
-        title : songInfo.title,
-        url : songInfo.video_url,
+        title : songInfo.items[0].title,
+        url : songInfo.items[0].url,
     };
+    console.log(songData.url);
+    console.log(songData.title);
     if (typeof serverQueue === "undefined") {
         const queueFields = {
             textChannel : message.channel,
@@ -59,7 +61,7 @@ async function dispatchSong(message, song, queue) {
         message.channel.send("Kaede's bored.. Leaving now!");
         return;
     }
-    const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
+    const dispatcher = serverQueue.connection.playStream(song.url).on('end', () => {
         message.channel.send("Kaede's song ended!");
         serverQueue.songs.shift();
         dispatchSong(message, serverQueue.songs[0], queue);
