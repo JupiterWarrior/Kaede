@@ -92,6 +92,16 @@ bot.on('message', async message => {
                         case "skipall":
                             MusicFunctions.skipAll(message, serverQueue);
                             break;
+                        case "loop":
+                            MusicFunctions.loop(message, serverQueue);
+                            break;
+                        case "np":
+                            MusicFunctions.nowPlaying(message, serverQueue);
+                            break;
+                        case "q":
+                        case "queue":
+                            MusicFunctions.queue(message, serverQueue);
+                            break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");
                             break;

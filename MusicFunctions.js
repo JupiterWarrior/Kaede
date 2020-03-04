@@ -1,4 +1,4 @@
-module.exports = {play, skip, skipAll, pause, resume}
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue}
 
 const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');
@@ -18,13 +18,19 @@ async function play(message, serverQueue, queue) {
     if (!permissions.has('SPEAK')) {
         message.channel.send('Kaede is not allowed to speak in the voice channel!');
     }
-    const songInfo = await getInfo(song);
+    let songInfo;
+    try {
+        songInfo = await getInfo(song);
+    } catch (error) {
+        message.channel.send("Kaede cannot find any songs with that title!");
+        return;
+    }
     const songData = {
         title : songInfo.items[0].title,
         url : songInfo.items[0].webpage_url,
     };
-    /* console.log(songData.url);
-    console.log(songData.title); */
+    //console.log(songData.url);
+    //console.log(songData.title);
     if (typeof serverQueue === "undefined") {
         const queueFields = {
             textChannel : message.channel,
@@ -33,6 +39,7 @@ async function play(message, serverQueue, queue) {
             songs : [],
             volume : 5,
             playing : true,
+            looping: false
         };
         queue.set(message.guild.id, queueFields);
         queueFields.songs.push(songData);
@@ -41,8 +48,8 @@ async function play(message, serverQueue, queue) {
             var connection = await voiceChannel.join();
             queueFields.connection = connection;
             dispatchSong(message, queueFields.songs[0], queue); 
-        } catch (err) {
-            //console.log(err);
+        } catch (error) {
+            //console.log(error);
             queue.delete(message.guild.id);
             message.channel.send("Kaede found an error in playing the music!");
             return;
@@ -63,35 +70,43 @@ async function dispatchSong(message, song, queue) {
             return theMessage.startsWith("^music play ");
         }
         try {
-            let collectedMessage = await message.channel.awaitMessages(filter, {max: 1, time : 60000, errors : ['time']});
-            play(collectedMessage.first(), serverQueue, queue);
+            await message.channel.awaitMessages(filter, {max: 1, time : 60000, errors : ['time']});
+            var intervalID = setInterval(() => {
+                if (serverQueue.songs && serverQueue.songs[0]) {
+                    dispatchSong(message, serverQueue.songs[0], queue);
+                    clearInterval(intervalID);
+                }
+            }, 1000);
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             serverQueue.voiceChannel.leave();
             queue.delete(message.guild.id);
             message.channel.send("Kaede's bored.. Leaving now!");
             return;
         }
+    } else {
+        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', (skip) => {
+            if (skip === true || !serverQueue.looping) {
+                serverQueue.songs.shift();
+            }
+            dispatchSong(message, serverQueue.songs[0], queue);
+        }).on('error', () => {
+            message.channel.send("Unexpected error occured!! Kaede's scared...");
+            //console.error(error);
+        });
+        dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
     }
-    const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
-        serverQueue.songs.shift();
-        dispatchSong(message, serverQueue.songs[0], queue);
-    }).on('error', () => {
-        message.channel.send("Unexpected error occured!! Kaede's scared...");
-        //console.error(error);
-    });
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 }
 async function skip(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip unless you're in a voice channel !");
         return;
     }
-    if (!serverQueue) {
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
-    serverQueue.connection.dispatcher.end();
+    serverQueue.connection.dispatcher.end(skip = true);
     message.channel.send("Kaede Skip!")
 }
 async function skipAll(message, serverQueue) {
@@ -99,7 +114,7 @@ async function skipAll(message, serverQueue) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
         return;
     }
-    if (!serverQueue) {
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
@@ -130,7 +145,7 @@ async function resume(message, serverQueue) {
         return;
     }
     if (!serverQueue) {
-        message.channel.send("No song is playing!");
+        message.channel.send("No song is paused!");
         return;
     }
     if (serverQueue.playing) {
@@ -140,6 +155,50 @@ async function resume(message, serverQueue) {
     serverQueue.connection.dispatcher.resume();
     serverQueue.playing = !serverQueue.connection.dispatcher.paused;
     message.channel.send("Kaede resume!");
+}
+async function loop(message, serverQueue) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot start looping songs unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song for Kaede to loop!");
+        return;
+    }
+    serverQueue.looping = !serverQueue.looping;
+    if (serverQueue.looping) {
+        message.channel.send("Song is now looping!");
+    } else {
+        message.channel.send("Song is no longer looping!");
+    }
+}
+async function nowPlaying(message, serverQueue) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song playing!");
+        return;
+    }
+
+    message.channel.send("Kaede is currently playing " + serverQueue.songs[0].title);
+}
+async function queue(message, serverQueue) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song playing!");
+        return;
+    }
+
+    let songsQueueMessage = "Kaede is queueing these songs!\nNow playing: " + serverQueue.songs[0].title + "\n";
+    for (let i = 1; i < serverQueue.songs.length; ++i) {
+        songsQueueMessage += ("" + i + ". " + serverQueue.songs[i].title + "\n");
+    }
+    message.channel.send(songsQueueMessage);
 }
 /*To do music commands:
 Optimize play ( kaede leaves too soon )

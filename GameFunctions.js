@@ -227,4 +227,11 @@ async function mostMath(message) {
 
 async function blackJack(message) {
 
+    // deal cards
+
+    // game loop
+    let gameOngoing = true;
+    while (gameOngoing) {
+
+    }
 }
