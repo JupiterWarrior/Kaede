@@ -71,12 +71,18 @@ async function dispatchSong(message, song, queue) {
         }
         try {
             await message.channel.awaitMessages(filter, {max: 1, time : 60000, errors : ['time']});
-            var intervalID = setInterval(() => {
+            // will trigger play from Kaede.js, we check every second until added to queue
+            var checkIfPlayDone = setInterval(() => {
                 if (serverQueue.songs && serverQueue.songs[0]) {
                     dispatchSong(message, serverQueue.songs[0], queue);
-                    clearInterval(intervalID);
+                    clearInterval(checkIfPlayDone);
                 }
             }, 1000);
+            // in case cannot find music with that name
+            var checkPreviousInterval = setInterval(() => {
+                clearInterval(checkIfPlayDone);
+                clearInterval(checkPreviousInterval);
+            }, 10000);
         } catch (error) {
             //console.log(error);
             serverQueue.voiceChannel.leave();
