@@ -77,30 +77,41 @@ bot.on('message', async message => {
                 else {
                     const serverQueue = queue.get(message.guild.id);
                     switch (arr[1]) {
+                        case "p":
                         case "play":
                             MusicFunctions.play(message, serverQueue, queue);
                             break;
+                        case "s":
                         case "skip":
                             MusicFunctions.skip(message, serverQueue);
                             break;
+                        case "ps":
                         case "pause":
                             MusicFunctions.pause(message, serverQueue);
                             break;
+                        case "r":
                         case "resume":
                             MusicFunctions.resume(message, serverQueue);
                             break;
+                        case "sall":
                         case "skipall":
                             MusicFunctions.skipAll(message, serverQueue);
                             break;
+                        case "l":
                         case "loop":
                             MusicFunctions.loop(message, serverQueue);
                             break;
                         case "np":
+                        case "nowplaying":
                             MusicFunctions.nowPlaying(message, serverQueue);
                             break;
                         case "q":
                         case "queue":
                             MusicFunctions.queue(message, serverQueue);
+                            break;
+                        case "rep":
+                        case "repeat":
+                            MusicFunctions.repeat(message, serverQueue);
                             break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");

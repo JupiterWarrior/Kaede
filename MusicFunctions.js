@@ -1,4 +1,4 @@
-module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue}
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat}
 
 const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');
@@ -39,7 +39,8 @@ async function play(message, serverQueue, queue) {
             songs : [],
             volume : 5,
             playing : true,
-            looping: false
+            looping: false,
+            repeating: false,
         };
         queue.set(message.guild.id, queueFields);
         queueFields.songs.push(songData);
@@ -70,7 +71,7 @@ async function dispatchSong(message, song, queue) {
             return theMessage.startsWith("^music play ");
         }
         try {
-            await message.channel.awaitMessages(filter, {max: 1, time : 60000, errors : ['time']});
+            await message.channel.awaitMessages(filter, {max: 1, time : 120000, errors : ['time']});
             // will trigger play from Kaede.js, we check every second until added to queue
             var checkIfPlayDone = setInterval(() => {
                 if (serverQueue.songs && serverQueue.songs[0]) {
@@ -92,8 +93,12 @@ async function dispatchSong(message, song, queue) {
         }
     } else {
         const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', (skip) => {
-            if (skip === true || !serverQueue.looping) {
+            if (skip || !serverQueue.looping) {
                 serverQueue.songs.shift();
+            }
+            if (serverQueue.repeating && !skip) {
+                serverQueue.looping = false;
+                serverQueue.repeating = false;
             }
             dispatchSong(message, serverQueue.songs[0], queue);
         }).on('error', () => {
@@ -171,6 +176,9 @@ async function loop(message, serverQueue) {
         message.channel.send("There's no song for Kaede to loop!");
         return;
     }
+    if (serverQueue.repeating) {
+        serverQueue.repeating = false;
+    }
     serverQueue.looping = !serverQueue.looping;
     if (serverQueue.looping) {
         message.channel.send("Song is now looping!");
@@ -206,17 +214,41 @@ async function queue(message, serverQueue) {
     }
     message.channel.send(songsQueueMessage);
 }
+async function repeat(message, serverQueue) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot start repeating songs unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song for Kaede to repeat!");
+        return;
+    }
+    if (serverQueue.looping) {
+        message.channel.send("Song is already looping!");
+        return;
+    }
+    if (serverQueue.repeating) {
+        message.channel.send("Kaede is repeating the song!\nTo repeat the song forever use ^music loop!");
+        return;
+    }
+    message.channel.send("Kaede repeat!");
+    serverQueue.repeating = true;
+    serverQueue.looping = true;
+}
+async function remove(message, serverQueue) {
+
+}
+async function first(message, serverQueue) {
+
+}
 /*To do music commands:
-Optimize play ( kaede leaves too soon )
-Skipall ( skips all song but kaede stays in connection )
-queue ( show the queue of songs )
-np (show what song is currently playing)
+Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from)
 Repeat ( repeat curr song once)
-loop (repeat curr song forever do loop again to prevent that)
 swap (change the orders of song)
 first (make a song to go to the first order)
 Remove ( remove a certain song in queue )
 Lyrics ( lyrics for song )
+previous (play previous song (added to last in queue))
 MoveTo ( move to a certain time in the youtube vid )
 // playlist commands ( playlists are stored in json file for certain diff servers.)
 Playlist ( creates a playlist )
