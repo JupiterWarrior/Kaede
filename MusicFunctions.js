@@ -235,8 +235,25 @@ async function repeat(message, serverQueue) {
     serverQueue.repeating = true;
     serverQueue.looping = true;
 }
-async function remove(message, serverQueue) {
-
+async function remove(message, serverQueue, index) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot remove a song unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song for Kaede to remove!");
+        return;
+    }
+    if (!index || index === NaN) {
+        message.channel.send("Kaede has no idea which song to remove!");
+        return;
+    }
+    if (index < 1 || index >= serverQueue.songs.length) {
+        message.channel.send("Kaede cannot find that song in the queue!");
+        return;
+    }
+    serverQueue.songs.splice(index, 1);
+    message.channel.send("Kaede remove!");
 }
 async function first(message, serverQueue) {
 
