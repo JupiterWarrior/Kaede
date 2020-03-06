@@ -223,7 +223,7 @@ async function repeat(message, serverQueue) {
         message.channel.send("There's no song for Kaede to repeat!");
         return;
     }
-    if (serverQueue.looping) {
+    if (serverQueue.looping && !serverQueue.repeating) {
         message.channel.send("Song is already looping!");
         return;
     }
