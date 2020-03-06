@@ -232,6 +232,6 @@ async function blackJack(message) {
     // game loop
     let gameOngoing = true;
     while (gameOngoing) {
-
+        break;
     }
 }

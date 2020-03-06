@@ -59,6 +59,17 @@ async function play(message, serverQueue, queue) {
     else {
         serverQueue.songs.push(songData);
         message.channel.send("Kaede has added " + songData.title + " to the queue!");
+        if (!queueFields.connection) {
+            try {
+                var connection = await voiceChannel.join();
+                queueFields.connection = connection;
+            } catch (error) {
+                //console.log(error);
+                queue.delete(message.guild.id);
+                message.channel.send("Kaede found an error in playing the music!");
+                return;
+            }
+        }
     }
 }
 
@@ -92,14 +103,19 @@ async function dispatchSong(message, song, queue) {
             return;
         }
     } else {
-        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', (skip) => {
-            if (skip || !serverQueue.looping) {
+        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', (skip = false) => {
+            console.log("on end");
+            if (skip || (!serverQueue.looping && !serverQueue.repeating)) {
+                console.log("enter shift");
+                console.log(skip);
+                console.log(serverQueue.repeating);
                 serverQueue.songs.shift();
             }
-            if (serverQueue.repeating && !skip) {
-                serverQueue.looping = false;
+            if (serverQueue.repeating) {
                 serverQueue.repeating = false;
             }
+            console.log("going to dispatchSong again");
+            console.log(serverQueue.songs[0]);
             dispatchSong(message, serverQueue.songs[0], queue);
         }).on('error', () => {
             message.channel.send("Unexpected error occured!! Kaede's scared...");
@@ -108,6 +124,7 @@ async function dispatchSong(message, song, queue) {
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
     }
 }
+
 async function skip(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip unless you're in a voice channel !");
@@ -120,6 +137,7 @@ async function skip(message, serverQueue) {
     serverQueue.connection.dispatcher.end(skip = true);
     message.channel.send("Kaede Skip!")
 }
+
 async function skipAll(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
@@ -133,6 +151,7 @@ async function skipAll(message, serverQueue) {
     serverQueue.connection.dispatcher.end();
     message.channel.send("Kaede skip all!");
 }
+
 async function pause(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot pause unless you're in a voice channel !");
@@ -150,6 +169,7 @@ async function pause(message, serverQueue) {
     serverQueue.playing = !serverQueue.connection.dispatcher.paused;
     message.channel.send("Kaede pause!");
 }
+
 async function resume(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot resume unless you're in a voice channel !");
@@ -167,6 +187,7 @@ async function resume(message, serverQueue) {
     serverQueue.playing = !serverQueue.connection.dispatcher.paused;
     message.channel.send("Kaede resume!");
 }
+
 async function loop(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot start looping songs unless you're in a voice channel !");
@@ -176,16 +197,15 @@ async function loop(message, serverQueue) {
         message.channel.send("There's no song for Kaede to loop!");
         return;
     }
-    if (serverQueue.repeating) {
-        serverQueue.repeating = false;
-    }
     serverQueue.looping = !serverQueue.looping;
+    serverQueue.repeating = false;
     if (serverQueue.looping) {
         message.channel.send("Song is now looping!");
     } else {
         message.channel.send("Song is no longer looping!");
     }
 }
+
 async function nowPlaying(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
@@ -198,6 +218,7 @@ async function nowPlaying(message, serverQueue) {
 
     message.channel.send("Kaede is currently playing " + serverQueue.songs[0].title);
 }
+
 async function queue(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
@@ -214,6 +235,7 @@ async function queue(message, serverQueue) {
     }
     message.channel.send(songsQueueMessage);
 }
+
 async function repeat(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot start repeating songs unless you're in a voice channel !");
@@ -223,7 +245,7 @@ async function repeat(message, serverQueue) {
         message.channel.send("There's no song for Kaede to repeat!");
         return;
     }
-    if (serverQueue.looping && !serverQueue.repeating) {
+    if (serverQueue.looping) {
         message.channel.send("Song is already looping!");
         return;
     }
@@ -233,8 +255,8 @@ async function repeat(message, serverQueue) {
     }
     message.channel.send("Kaede repeat!");
     serverQueue.repeating = true;
-    serverQueue.looping = true;
 }
+
 async function remove(message, serverQueue, index) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot remove a song unless you're in a voice channel !");
@@ -244,7 +266,7 @@ async function remove(message, serverQueue, index) {
         message.channel.send("There's no song for Kaede to remove!");
         return;
     }
-    if (!index || index === NaN) {
+    if (!index || isNaN(index)) {
         message.channel.send("Kaede has no idea which song to remove!");
         return;
     }
@@ -255,6 +277,7 @@ async function remove(message, serverQueue, index) {
     serverQueue.songs.splice(index, 1);
     message.channel.send("Kaede remove!");
 }
+
 async function first(message, serverQueue) {
 
 }
