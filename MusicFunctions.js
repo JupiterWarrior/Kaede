@@ -1,4 +1,4 @@
-module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat}
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove}
 
 const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');

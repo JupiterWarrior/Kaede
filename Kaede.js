@@ -117,7 +117,7 @@ bot.on('message', async message => {
                             break;
                         case "rem":
                         case "remove":
-                            MusicFunctions.remove(message, serverQueue, arr[2]);
+                            MusicFunctions.remove(message, serverQueue, Number(arr[2]));
                             break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");
