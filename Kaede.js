@@ -41,10 +41,10 @@ bot.on('message', async message => {
                 if (!gameInProgress) {
                     if (arr.length === 1) {
                         message.channel.send(
-                            "What game do you want to play? Type `^play [gameCMD]` to play the game.\n" +
-                            ">>> Rock, paper & scissors; `= rps`\n" + 
-                            "Guess the number; `= guess`\n" + 
-                            "Answer most math questions; `= mm`\n" +
+                            "What game do you want to play? Type `^play gameCMD` to play the game. Kaede hint: GameCMD is the one in a different font.\n" +
+                            ">>> Rock, paper & scissors; `rps`\n" + 
+                            "Guess the number; `guess`\n" + 
+                            "Answer most math questions; `mm`\n" +
                             "Best Game Incoming..."
                             );
                     }
@@ -118,6 +118,10 @@ bot.on('message', async message => {
                         case "rem":
                         case "remove":
                             MusicFunctions.remove(message, serverQueue, Number(arr[2]));
+                            break;
+                        case "f":
+                        case "first":
+                            MusicFunctions.first(message, serverQueue, Number(arrr[2]));
                             break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");

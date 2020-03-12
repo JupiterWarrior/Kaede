@@ -1,4 +1,4 @@
-module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove}
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first}
 
 const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');
@@ -32,7 +32,7 @@ async function play(message, serverQueue, queue) {
     //console.log(songData.url);
     //console.log(songData.title);
     if (typeof serverQueue === "undefined") {
-        const queueFields = {
+        const queueFields = { // queuefields is the same as serverQueue.
             textChannel : message.channel,
             voiceChannel : voiceChannel,
             connection : null,
@@ -59,10 +59,10 @@ async function play(message, serverQueue, queue) {
     else {
         serverQueue.songs.push(songData);
         message.channel.send("Kaede has added " + songData.title + " to the queue!");
-        if (!queueFields.connection) {
+        if (!serverQueue.connection) {
             try {
                 var connection = await voiceChannel.join();
-                queueFields.connection = connection;
+                serverQueue.connection = connection;
             } catch (error) {
                 //console.log(error);
                 queue.delete(message.guild.id);
@@ -266,7 +266,7 @@ async function remove(message, serverQueue, index) {
         message.channel.send("There's no song for Kaede to remove!");
         return;
     }
-    if (!index || isNaN(index)) {
+    if ((!index && index != 0) || isNaN(index)) { // index = 0 makes !index true
         message.channel.send("Kaede has no idea which song to remove!");
         return;
     }
@@ -278,15 +278,38 @@ async function remove(message, serverQueue, index) {
     message.channel.send("Kaede remove!");
 }
 
-async function first(message, serverQueue) {
+async function first(message, serverQueue, index) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot prioritize a song unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song for Kaede to prioritize!");
+        return;
+    }
+    if ((!index && index != 0) || isNaN(index)) { // index = 0 makes !index true
+        message.channel.send("Kaede has no idea which song to prioritize!");
+        return;
+    }
+    if (index < 1 || index >= serverQueue.songs.length) {
+        message.channel.send("Kaede cannot find that song in the queue!");
+        return;
+    }
+    if (index == 1) {
+        message.channel.send("The song will play right after the current song already! Don't make Kaede state obvious things!!");
+        return;
+    }
+    swap(message, serverQueue, 1, index);
+    message.channel.send("Kaede first!");
+}
 
+async function swap(message, serverQueue, index1, index2) {
+    
 }
 /*To do music commands:
 Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from)
-Repeat ( repeat curr song once)
 swap (change the orders of song)
 first (make a song to go to the first order)
-Remove ( remove a certain song in queue )
 Lyrics ( lyrics for song )
 previous (play previous song (added to last in queue))
 MoveTo ( move to a certain time in the youtube vid )
