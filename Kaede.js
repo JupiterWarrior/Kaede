@@ -121,7 +121,11 @@ bot.on('message', async message => {
                             break;
                         case "f":
                         case "first":
-                            MusicFunctions.first(message, serverQueue, Number(arrr[2]));
+                            MusicFunctions.first(message, serverQueue, Number(arr[2]));
+                            break;
+                        case "sw":
+                        case "swap":
+                            MusicFunctions.swap(message, serverQueue, Number(arr[2]), Number(arr[3]));
                             break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");

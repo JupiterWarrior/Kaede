@@ -1,4 +1,4 @@
-module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first}
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first, swap}
 
 const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');
@@ -304,7 +304,30 @@ async function first(message, serverQueue, index) {
 }
 
 async function swap(message, serverQueue, index1, index2) {
-    
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot swap 2 songs unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no songs for Kaede to swap!");
+        return;
+    }
+    if ((!index && index != 0) || isNaN(index)) { // index = 0 makes !index true
+        message.channel.send("Kaede has no idea which songs to swap!");
+        return;
+    }
+    if (index1 < 1 || index2 < 1 || index2 >= serverQueue.songs.length || index1 >= serverQueue.songs.length) {
+        message.channel.send("Kaede cannot find those songs in the queue!");
+        return;
+    }
+    if (index1 === index2) {
+        message.channel.send("Kaede is confused why you are swapping the same songs?");
+        return;
+    }
+    let temp = serverQueue.songs[index1];
+    serverQueue.songs[index1] = serverQueue.songs[index2];
+    serverQueue.songs[index2] = temp;
+    message.channel.send("Kaede Swap!");
 }
 /*To do music commands:
 Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from)
