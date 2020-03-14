@@ -266,7 +266,7 @@ async function remove(message, serverQueue, index) {
         message.channel.send("There's no song for Kaede to remove!");
         return;
     }
-    if ((!index && index != 0) || isNaN(index)) { // index = 0 makes !index true
+    if ((!index && index !== 0) || isNaN(index)) { // index = 0 makes !index true
         message.channel.send("Kaede has no idea which song to remove!");
         return;
     }
@@ -287,7 +287,7 @@ async function first(message, serverQueue, index) {
         message.channel.send("There's no song for Kaede to prioritize!");
         return;
     }
-    if ((!index && index != 0) || isNaN(index)) { // index = 0 makes !index true
+    if ((!index && index !== 0) || isNaN(index)) { // index = 0 makes !index true
         message.channel.send("Kaede has no idea which song to prioritize!");
         return;
     }
@@ -295,12 +295,12 @@ async function first(message, serverQueue, index) {
         message.channel.send("Kaede cannot find that song in the queue!");
         return;
     }
-    if (index == 1) {
+    if (index === 1) {
         message.channel.send("The song will play right after the current song already! Don't make Kaede state obvious things!!");
         return;
     }
-    swap(message, serverQueue, 1, index);
     message.channel.send("Kaede first!");
+    swap(message, serverQueue, 1, index);
 }
 
 async function swap(message, serverQueue, index1, index2) {
@@ -312,7 +312,7 @@ async function swap(message, serverQueue, index1, index2) {
         message.channel.send("There's no songs for Kaede to swap!");
         return;
     }
-    if ((!index && index != 0) || isNaN(index)) { // index = 0 makes !index true
+    if ((!index1 && index1 !== 0) || isNaN(index1) || (!index2 && index2 !== 0) || isNaN(index2)) { // index = 0 makes !index true
         message.channel.send("Kaede has no idea which songs to swap!");
         return;
     }
