@@ -330,9 +330,7 @@ async function swap(message, serverQueue, index1, index2) {
     message.channel.send("Kaede Swap!");
 }
 /*To do music commands:
-Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from)
-swap (change the orders of song)
-first (make a song to go to the first order)
+Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from & please make getInfo run faster)
 Lyrics ( lyrics for song )
 previous (play previous song (added to last in queue))
 MoveTo ( move to a certain time in the youtube vid )
