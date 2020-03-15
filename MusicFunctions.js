@@ -300,7 +300,9 @@ async function first(message, serverQueue, index) {
         return;
     }
     message.channel.send("Kaede first!");
-    swap(message, serverQueue, 1, index);
+    let temp = serverQueue.songs[1];
+    serverQueue.songs[1] = serverQueue.songs[index];
+    serverQueue.songs[index] = temp;
 }
 
 async function swap(message, serverQueue, index1, index2) {
