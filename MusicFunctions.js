@@ -104,18 +104,18 @@ async function dispatchSong(message, song, queue) {
         }
     } else {
         const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', (skip = false) => {
-            console.log("on end");
+            //console.log("on end");
             if (skip || (!serverQueue.looping && !serverQueue.repeating)) {
-                console.log("enter shift");
-                console.log(skip);
-                console.log(serverQueue.repeating);
+                //console.log("enter shift");
+                //console.log(skip);
+                //console.log(serverQueue.repeating);
                 serverQueue.songs.shift();
             }
             if (serverQueue.repeating) {
                 serverQueue.repeating = false;
             }
-            console.log("going to dispatchSong again");
-            console.log(serverQueue.songs[0]);
+            //console.log("going to dispatchSong again");
+            //console.log(serverQueue.songs[0]);
             dispatchSong(message, serverQueue.songs[0], queue);
         }).on('error', () => {
             message.channel.send("Unexpected error occured!! Kaede's scared...");
@@ -330,6 +330,9 @@ async function swap(message, serverQueue, index1, index2) {
     serverQueue.songs[index1] = serverQueue.songs[index2];
     serverQueue.songs[index2] = temp;
     message.channel.send("Kaede Swap!");
+}
+async function getYoutubeInfo(song) {
+    
 }
 /*To do music commands:
 Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from & please make getInfo run faster)
