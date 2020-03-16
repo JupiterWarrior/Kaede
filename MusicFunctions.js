@@ -103,19 +103,13 @@ async function dispatchSong(message, song, queue) {
             return;
         }
     } else {
-        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', (skip = false) => {
-            //console.log("on end");
-            if (skip || (!serverQueue.looping && !serverQueue.repeating)) {
-                //console.log("enter shift");
-                //console.log(skip);
-                //console.log(serverQueue.repeating);
+        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
+            if (!serverQueue.looping && !serverQueue.repeating) {
                 serverQueue.songs.shift();
             }
             if (serverQueue.repeating) {
                 serverQueue.repeating = false;
             }
-            //console.log("going to dispatchSong again");
-            //console.log(serverQueue.songs[0]);
             dispatchSong(message, serverQueue.songs[0], queue);
         }).on('error', () => {
             message.channel.send("Unexpected error occured!! Kaede's scared...");
@@ -134,7 +128,7 @@ async function skip(message, serverQueue) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
-    serverQueue.connection.dispatcher.end(skip = true);
+    serverQueue.connection.dispatcher.end();
     message.channel.send("Kaede Skip!")
 }
 
