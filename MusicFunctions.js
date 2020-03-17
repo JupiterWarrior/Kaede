@@ -1,8 +1,11 @@
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first, swap}
 
-const MiscFunctions = require('./MiscFunctions.js');
 const ytdl = require('ytdl-core');
-const {getInfo} = require('ytdl-getinfo');
+const url = require('url');
+const querystring = require('querystring');
+const entities = require('html-entities').AllHtmlEntities;
+const https = require('https');
+const BASE_URL = 'https://www.youtube.com/results?';
 
 async function play(message, serverQueue, queue) {
     const song = message.content.substring(12);
@@ -20,17 +23,15 @@ async function play(message, serverQueue, queue) {
     }
     let songInfo;
     try {
-        songInfo = await getInfo(song);
+        songInfo = await getYoutubeInfo(song);
     } catch (error) {
         message.channel.send("Kaede cannot find any songs with that title!");
         return;
     }
     const songData = {
-        title : songInfo.items[0].title,
-        url : songInfo.items[0].webpage_url,
+        title : songInfo[0].title,
+        url : songInfo[0].link,
     };
-    //console.log(songData.url);
-    //console.log(songData.title);
     if (typeof serverQueue === "undefined") {
         const queueFields = { // queuefields is the same as serverQueue.
             textChannel : message.channel,
@@ -325,9 +326,6 @@ async function swap(message, serverQueue, index1, index2) {
     serverQueue.songs[index2] = temp;
     message.channel.send("Kaede Swap!");
 }
-async function getYoutubeInfo(song) {
-    
-}
 /*To do music commands:
 Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from & please make getInfo run faster)
 Lyrics ( lyrics for song )
@@ -341,3 +339,97 @@ remove (from playlist)
 list (show playlist)
 playlists (show all playlists in server)
 */
+
+// code referenced from https://github.com/TimeForANinja/node-ytsr/blob/master/lib
+async function getYoutubeInfo(searchString, callback = null) {
+    if (!callback) {
+        return new Promise((resolve, reject) => {
+            getYoutubeInfo(searchString, (err, info) => {
+                if (err) return reject(err);
+                resolve(info);
+            });
+        });
+    }
+    const link = BASE_URL + querystring.encode({
+        search_query: searchString,
+        spf: 'navigate',
+        gl: 'CA',
+        hl: 'en',
+    });
+    getPage(link, (err, body) => {
+        if (err) return callback(err);
+        let content;
+        try {
+            const parsed = JSON.parse(body);
+            content = parsed[parsed.length - 1].body.content;
+        } catch (error) {
+            return callback(error);
+        }
+
+        // Get the table of items and parse it(remove null items where the parsing failed)
+        const items = 
+            between(content, '<ol id="item-section-', '\n</ol>')
+            .split('</li>\n\n<li>')
+            .filter(item => {
+            let condition1 = !item.includes('<div class="pyv-afc-ads-container" style="visibility:visible">');
+            let condition2 = !item.includes('<span class="spell-correction-corrected">');
+            let condition3 = !item.includes('<div class="search-message">');
+            let condition4 = !item.includes('<li class="search-exploratory-line">');
+            return condition1 && condition2 && condition3 && condition4;
+            })
+            .map(item => parseItem(item))
+            .filter(item => item) // removes null
+            .filter((item, index) => index < 5);
+        return callback(null, items);
+    });
+}
+
+// Start of parsing an item, only want type video
+function parseItem(item) {
+  const titles = between(item, '<div class="', '"');
+  const type = between(titles, 'yt-lockup yt-lockup-tile yt-lockup-', ' ');
+  if (type === 'video') {
+    const rawDesc = between(between(item, '<div class="yt-lockup-description', '</div>'), '>');
+    return {
+        title: removeHtml(between(between(item, '<a href="', '</a>'), '>')),
+        link: url.resolve(BASE_URL, removeHtml(between(item, 'href="', '"'))),
+        description: removeHtml(rawDesc) || null,
+      };
+  }
+  return null;
+};
+
+// Taken from https://github.com/fent/node-ytdl-core/
+function between(haystack, left, right) {
+  let pos;
+  pos = haystack.indexOf(left);
+  if (pos === -1) { return ''; }
+  haystack = haystack.slice(pos + left.length);
+  if (!right) { return haystack; }
+  pos = haystack.indexOf(right);
+  if (pos === -1) { return ''; }
+  haystack = haystack.slice(0, pos);
+  return haystack;
+};
+
+// Cleans up html text
+function removeHtml(string) {
+    return new entities().decode(
+        string.replace(/\n/g, ' ')
+            .replace(/\s*<\s*br\s*\/?\s*>\s*/gi, '\n')
+            .replace(/<\s*\/\s*p\s*>\s*<\s*p[^>]*>/gi, '\n')
+            .replace(/<.*?>/gi, ''),
+        ).trim();
+}
+
+function getPage(link, callback) {
+  const request = https.get(link, resp => {
+    if (resp.statusCode !== 200) return callback(new Error(`Status Code ${resp.statusCode}`));
+    const respBuffer = [];
+    resp.on('data', d => respBuffer.push(d));
+    resp.on('end', () => {
+        callback(null, Buffer.concat(respBuffer).toString());
+    });
+  });
+  request.on('error', callback);
+};
