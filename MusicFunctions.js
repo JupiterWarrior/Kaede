@@ -370,8 +370,13 @@ async function previous(message, serverQueue) {
     serverQueue.songs.push(prev);
     message.channel.send("Kaede has added " + prev.title + " back into the queue!");
 }
+async function lyrics(message, serverQueue) {
+
+}
+async function moveTo(message, serverQueue, time) {
+
+}
 /*To do music commands:
-Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from )
 Lyrics ( lyrics for song )
 MoveTo ( move to a certain time in the youtube vid )
 // playlist commands ( playlists are stored in json file for certain diff servers.)
@@ -382,6 +387,13 @@ remove (from playlist)
 list (show playlist)
 playlists (show all playlists in server)
 */
+
+/* Playlist functions */
+class playlist {
+    // jamie shud i create a class or just functions
+}
+
+/* Helper Functions to help getting the youtube top 5 URL for the play function */
 
 // code referenced from https://github.com/TimeForANinja/node-ytsr/blob/master/lib
 async function getYoutubeInfo(searchString, callback = null) {
