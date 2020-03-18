@@ -1,4 +1,4 @@
-module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first, swap}
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first, swap, previous}
 
 const ytdl = require('ytdl-core');
 const url = require('url');
@@ -6,6 +6,7 @@ const querystring = require('querystring');
 const entities = require('html-entities').AllHtmlEntities;
 const https = require('https');
 const BASE_URL = 'https://www.youtube.com/results?';
+var prev;
 
 async function play(message, serverQueue, queue) {
     const song = message.content.substring(12);
@@ -106,6 +107,7 @@ async function dispatchSong(message, song, queue) {
     } else {
         const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
             if (!serverQueue.looping && !serverQueue.repeating) {
+                prev = serverQueue.songs[0];
                 serverQueue.songs.shift();
             }
             if (serverQueue.repeating) {
@@ -326,10 +328,25 @@ async function swap(message, serverQueue, index1, index2) {
     serverQueue.songs[index2] = temp;
     message.channel.send("Kaede Swap!");
 }
+async function previous(message, serverQueue) {
+    if (!message.member.voiceChannel) {
+        message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
+        return;
+    }
+    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
+        message.channel.send("There's no song for Kaede to skip!");
+        return;
+    }
+    if (prev === null) {
+        message.channel.send("There is no previous song!");
+        return;
+    }
+    serverQueue.songs.push(prev);
+    message.channel.send("Kaede has added " + prev.title + " back into the queue!");
+}
 /*To do music commands:
-Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from & please make getInfo run faster)
+Optimize play ( show list of songs to be added everytime before playing | make 2 modes where one is first song the other is list of songs to choose from )
 Lyrics ( lyrics for song )
-previous (play previous song (added to last in queue))
 MoveTo ( move to a certain time in the youtube vid )
 // playlist commands ( playlists are stored in json file for certain diff servers.)
 Playlist ( creates a playlist )
