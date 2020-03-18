@@ -1,5 +1,6 @@
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first, swap, previous}
 
+const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const url = require('url');
 const querystring = require('querystring');
@@ -29,6 +30,17 @@ async function play(message, serverQueue, queue) {
         message.channel.send("Kaede cannot find any songs with that title!");
         return;
     }
+    const songInfoEmbed = new Discord.RichEmbed().setColor
+    ('AQUA').setTitle('Top 5 songs').setAuthor('Kaede').setImage
+    ('https://vignette.wikia.nocookie.net/assassination-classroom/images/f/f0/Kaede_kayano_Profil.jpg/revision/latest/top-crop/width/360/height/450?cb=20160304163916&path-prefix=de')
+    .setDescription('Please type the song number').setURL('https://jamiesebastian.com/').addField(
+        {name : 'Song number 1', value : songInfo[0].title, inline: false},
+        {name : 'Song number 2', value : songInfo[1].title, inline: false},
+        {name : 'Song number 3', value : songInfo[2].title, inline: false},
+        {name : 'Song number 4', value : songInfo[3].title, inline: false},
+        {name : 'Song number 5', value : songInfo[4].title, inline: false},
+    ).setFooter('Tip: Kaede can do more cool stuff than this! Check out ^[Category CMDS] help or in general do ^help');
+    message.channel.send(songInfoEmbed);
     const songData = {
         title : songInfo[0].title,
         url : songInfo[0].link,
@@ -337,7 +349,7 @@ async function previous(message, serverQueue) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
-    if (prev === null) {
+    if (!prev) {
         message.channel.send("There is no previous song!");
         return;
     }
