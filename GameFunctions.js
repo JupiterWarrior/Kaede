@@ -61,7 +61,7 @@ async function checkForHighscore(playerId, newScore, gameStat) {
         if (!gameStatsObj[playerId][gameStat]) {
             gameStatsObj[playerId][gameStat] = 0;
         }
-        gameStatsObj[playerId][gameStat] = Math.max(newScore, gameStatsObj[playerId][gameStat]);
+        gameStatsObj[playerId][gameStat] = Math.max(newScore, gameStatsObj[playerId][gameStat]); // Find max to find highscore
         json = JSON.stringify(gameStatsObj);
         fs.writeFile('KaedeGameStats.json', json, 'utf8', (error) => {
             if (error) {
@@ -133,7 +133,10 @@ async function rps(message) {
         }
     }
 }
-
+/**
+ * The game function implementation for guess the number between 1-10.
+ * @param {*} message message object sent in order to play the game
+ */
 async function guessNumber(message) {
     const filter = m => {
         let num = Number(m.content);
@@ -141,7 +144,7 @@ async function guessNumber(message) {
     }
     message.channel.send("You have 3 chances to guess Kaede's number! It's between 1 and 10 <:tachi_smile:683109333621669912> Hehehe, you'll never guess it!");
     let guessesLeft = 3;
-    let correctNumber = Math.floor(Math.random() * 10 + 1);
+    let correctNumber = Math.floor(Math.random() * 10 + 1); // create a random between 1-10
     while (guessesLeft > 0) {
         try {
             let collected = await message.channel.awaitMessages(filter, {max: 1, time : 10000, errors: ['time']});
@@ -173,13 +176,16 @@ async function guessNumber(message) {
     }
     message.channel.send("Hehehe! Kaede wins! You're out of guesses <:02smug:683109333156102159> Kaede's number is " + correctNumber + "!");
 }
-
+/**
+ * The game function used in the implementation of most math questions answered.
+ * @param {*} message message object sent to play the game.
+ */
 async function mostMath(message) {
     const openum = {
         ADD : "+",
         SUB : "-",
         MUL : "*",
-    }
+    } // enumeration for operations
     const filter = m => {
         let num = Number(m.content);
         return m.author.id === message.author.id && !isNaN(num);
@@ -219,7 +225,7 @@ async function mostMath(message) {
         }
         answered = false;
         try {
-            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 30000 + start - Date.now(), errors: ['time']});
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 30000 + start - Date.now(), errors: ['time']}); 
             let answer = Number(collected.first().content);
             if (answer === actualAns) {
                 countCorrect++;
@@ -248,7 +254,10 @@ async function mostMath(message) {
         message.channel.send("Kaede's very disappointed in you! Kaede no like you! <:4199_charlotte_ugh:683110139024113697>")
     }
 }
-
+/**
+ * Game implementation for blackjack in kaede bot.
+ * @param {*} message message object sent in order to play the game.
+ */
 async function blackJack(message) {
 
     // deal cards
