@@ -26,7 +26,7 @@ const fs = require('fs');
 var prev;
 
 async function play(message, serverQueue, queue) {
-    const song = message.content.substring(12);
+    const song = message.content.substring(6);
     const voiceChannel = message.member.voiceChannel;
     if (!voiceChannel) {
         message.channel.send("Kaede cannot play music if you are not in a voice channel!");
@@ -164,7 +164,7 @@ async function dispatchSong(message, song, queue) {
     }
 }
 
-async function skip(message, serverQueue) {
+function skip(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip unless you're in a voice channel !");
         return;
@@ -177,7 +177,7 @@ async function skip(message, serverQueue) {
     message.channel.send("Kaede Skip!")
 }
 
-async function skipAll(message, serverQueue) {
+function skipAll(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
         return;
@@ -191,7 +191,7 @@ async function skipAll(message, serverQueue) {
     message.channel.send("Kaede skip all!");
 }
 
-async function pause(message, serverQueue) {
+function pause(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot pause unless you're in a voice channel !");
         return;
@@ -209,7 +209,7 @@ async function pause(message, serverQueue) {
     message.channel.send("Kaede pause!");
 }
 
-async function resume(message, serverQueue) {
+function resume(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot resume unless you're in a voice channel !");
         return;
@@ -227,7 +227,7 @@ async function resume(message, serverQueue) {
     message.channel.send("Kaede resume!");
 }
 
-async function loop(message, serverQueue) {
+function loop(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot start looping songs unless you're in a voice channel !");
         return;
@@ -245,7 +245,7 @@ async function loop(message, serverQueue) {
     }
 }
 
-async function nowPlaying(message, serverQueue) {
+function nowPlaying(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
         return;
@@ -258,7 +258,7 @@ async function nowPlaying(message, serverQueue) {
     message.channel.send("Kaede is currently playing " + serverQueue.songs[0].title);
 }
 
-async function queue(message, serverQueue) {
+function queue(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
         return;
@@ -275,7 +275,7 @@ async function queue(message, serverQueue) {
     message.channel.send(songsQueueMessage);
 }
 
-async function repeat(message, serverQueue) {
+function repeat(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot start repeating songs unless you're in a voice channel !");
         return;
@@ -296,7 +296,7 @@ async function repeat(message, serverQueue) {
     serverQueue.repeating = true;
 }
 
-async function remove(message, serverQueue, index) {
+function remove(message, serverQueue, index) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot remove a song unless you're in a voice channel !");
         return;
@@ -317,7 +317,7 @@ async function remove(message, serverQueue, index) {
     message.channel.send("Kaede remove!");
 }
 
-async function first(message, serverQueue, index) {
+function first(message, serverQueue, index) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot prioritize a song unless you're in a voice channel !");
         return;
@@ -344,7 +344,7 @@ async function first(message, serverQueue, index) {
     serverQueue.songs[index] = temp;
 }
 
-async function swap(message, serverQueue, index1, index2) {
+function swap(message, serverQueue, index1, index2) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot swap 2 songs unless you're in a voice channel !");
         return;
@@ -370,7 +370,7 @@ async function swap(message, serverQueue, index1, index2) {
     serverQueue.songs[index2] = temp;
     message.channel.send("Kaede Swap!");
 }
-async function previous(message, serverQueue) {
+function previous(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
         return;
@@ -419,7 +419,7 @@ function createPlaylist(message, name) {
         }
     })
 }
-function addToPlaylist(message, playlistName, songName) {
+async function addToPlaylist(message, playlistName, songName) {
     fs.readFile('Playlists.json', 'utf8', async (error, data) => {
         if (error){
             console.log(error);

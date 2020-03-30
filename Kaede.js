@@ -30,6 +30,7 @@ bot.on('message', async message => {
                 arr[i] = arr[i].toLowerCase();
             }
         }
+        const serverQueue = queue.get(message.guild.id);
         switch (firstcmd) {
             case "help":
                 message.channel.send("in progress");
@@ -37,11 +38,11 @@ bot.on('message', async message => {
             case "test":
                 message.channel.send("hellooo <3");
                 break;
-            case "play":
+            case "game":
                 if (!gameInProgress) {
                     if (arr.length === 1) {
                         message.channel.send(
-                            "What game do you want to play? Type `^play gameCMD` to play the game. Kaede hint: GameCMD is the one in a different font.\n" +
+                            "What game do you want to play? Type `^game gameCMD` to play the game. Kaede hint: GameCMD is the one in a different font.\n" +
                             ">>> Rock, paper & scissors; `rps`\n" + 
                             "Guess the number; `guess`\n" + 
                             "Answer most math questions; `mm`\n" +
@@ -71,87 +72,75 @@ bot.on('message', async message => {
                     }
                 }
                 break;
-            case "music":
-                if (arr.length === 1) {
-                    message.channel.send("Welcome to Kaede's music mode! Here is list of commands you can do!\n" +
-                    "");
-                }
-                else {
-                    const serverQueue = queue.get(message.guild.id);
-                    switch (arr[1]) {
-                        case "p":
-                        case "play":
-                            MusicFunctions.play(message, serverQueue, queue);
-                            break;
-                        case "s":
-                        case "skip":
-                            MusicFunctions.skip(message, serverQueue);
-                            break;
-                        case "ps":
-                        case "pause":
-                            MusicFunctions.pause(message, serverQueue);
-                            break;
-                        case "r":
-                        case "resume":
-                            MusicFunctions.resume(message, serverQueue);
-                            break;
-                        case "sall":
-                        case "skipall":
-                            MusicFunctions.skipAll(message, serverQueue);
-                            break;
-                        case "l":
-                        case "loop":
-                            MusicFunctions.loop(message, serverQueue);
-                            break;
-                        case "np":
-                        case "nowplaying":
-                            MusicFunctions.nowPlaying(message, serverQueue);
-                            break;
-                        case "q":
-                        case "queue":
-                            MusicFunctions.queue(message, serverQueue);
-                            break;
-                        case "rep":
-                        case "repeat":
-                            MusicFunctions.repeat(message, serverQueue);
-                            break;
-                        case "rem":
-                        case "remove":
-                            MusicFunctions.remove(message, serverQueue, Number(arr[2]));
-                            break;
-                        case "f":
-                        case "first":
-                            MusicFunctions.first(message, serverQueue, Number(arr[2]));
-                            break;
-                        case "sw":
-                        case "swap":
-                            MusicFunctions.swap(message, serverQueue, Number(arr[2]), Number(arr[3]));
-                            break;
-                        case "prev":
-                        case "previous":
-                            MusicFunctions.previous(message, serverQueue);
-                            break;
-                        case "playlist":
-                        case "plist":
-                            MusicFunctions.createPlaylist(message, arr[2]);
-                            break;
-                        case "add":
-                            if (arr.length == 3) {
-                                message.channel.send("Please choose a song name!");
-                                break;
-                            }
-                            var songStr = "";
-                            for (i = 3; i < arr.length; ++i) {
-                                songStr = songStr + arr[i] + " ";
-                            }
-                            songStr = songStr.trim();
-                            console.log(songStr);
-                            MusicFunctions.addToPlaylist(message, arr[2], songStr);
-                            break;
-                        default:
-                            message.channel.send("This command is not in Kaede's music commands!!");
-                            break;
-                    }
+            case "play":
+            case "p":
+                MusicFunctions.play(message, serverQueue, queue);
+                break;
+            case "s":
+            case "skip":
+                MusicFunctions.skip(message, serverQueue);
+                break;
+            case "ps":
+            case "pause":
+                MusicFunctions.pause(message, serverQueue);
+                break;
+            case "r":
+            case "resume":
+                MusicFunctions.resume(message, serverQueue);
+                break;
+            case "sall":
+            case "skipall":
+                MusicFunctions.skipAll(message, serverQueue);
+                break;
+            case "l":
+            case "loop":
+                MusicFunctions.loop(message, serverQueue);
+                break;
+            case "np":
+            case "nowplaying":
+                MusicFunctions.nowPlaying(message, serverQueue);
+                break;
+            case "q":
+            case "queue":
+                MusicFunctions.queue(message, serverQueue);
+                break;
+            case "rep":
+            case "repeat":
+                MusicFunctions.repeat(message, serverQueue);
+                break;
+            case "rem":
+            case "remove":
+                MusicFunctions.remove(message, serverQueue, Number(arr[1]));
+                break;
+            case "f":
+            case "first":
+                MusicFunctions.first(message, serverQueue, Number(arr[1]));
+                break;
+            case "sw":
+            case "swap":
+                MusicFunctions.swap(message, serverQueue, Number(arr[1]), Number(arr[2]));
+                break;
+            case "prev":
+            case "previous":
+                MusicFunctions.previous(message, serverQueue);
+                break;
+            case "playlist":
+                switch (arr[1]) {
+                    case "create":
+                        MusicFunctions.createPlaylist(message, arr[2]);
+                        break;
+                    case "add":
+                        var songStr = "";
+                        for (i = 3; i < arr.length; ++i) {
+                            songStr = songStr + arr[i] + " ";
+                        }
+                        songStr = songStr.trim();
+                        //console.log(songStr);
+                        MusicFunctions.addToPlaylist(message, arr[2], songStr);
+                        break;
+                    default:
+                        message.channel.send("This command is not in Kaede's playlist commands!!");
+                        break;
                 }
                 break;
             case "profile":
