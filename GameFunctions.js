@@ -1,10 +1,23 @@
+/**
+ * Module used to implement Game functions for the Kaede Bot.
+ */
+
 module.exports = {
     rps, guessNumber, mostMath, blackJack
 }
 
+/**
+ * Global Variables and Module imports defined.
+ */
+
 const MiscFunctions = require('./MiscFunctions.js');
 const fs = require('fs');
 
+/**
+ * Helper function used to increment the game wins of the user for certain games. 
+ * @param {*} playerId the unique id of the discord user.
+ * @param {*} gameStat the game stat string to be updated on.
+ */
 async function incrementGameWins(playerId, gameStat) {
     fs.readFile('KaedeGameStats.json', 'utf8', async (error, data) => {
         if (error){
@@ -27,6 +40,13 @@ async function incrementGameWins(playerId, gameStat) {
         });
     }});
 }
+
+/**
+ * Helper function to update the highscore of the user for certain games.
+ * @param {*} playerId the unique id of the discord user.
+ * @param {*} newScore the new score the user just got.
+ * @param {*} gameStat the game stat string to be updated on.
+ */
 
 async function checkForHighscore(playerId, newScore, gameStat) {
     fs.readFile('KaedeGameStats.json', 'utf8', (error, data) => {
@@ -51,6 +71,10 @@ async function checkForHighscore(playerId, newScore, gameStat) {
     }});
 }
 
+/**
+ * The game function for the rock, paper & scissors game.
+ * @param {*} message the message object sent to play the game.
+ */
 async function rps(message) {
     const rpsenum = {
         ROCK : 1,

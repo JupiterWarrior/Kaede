@@ -388,7 +388,7 @@ function previous(message, serverQueue) {
 }
 
 /* Playlist functions */
-function createPlaylist(message, name) {
+async function createPlaylist(message, name) {
     fs.readFile('Playlists.json', 'utf8', async (error, data) => {
         if (error){
             console.log(error);

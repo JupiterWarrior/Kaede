@@ -2,10 +2,15 @@
  * Main javascript file for the Kaede bot.
  * COPYRIGHT 2020 Elbert Ng, Jamie Sebastian ALL RIGHTS RESERVED.
  * Note from Elbert : Please check for the running times of certain algorithms in the code and see
- * whether the asymptotic running times of algorithms can be reduced
+ * whether the asymptotic running times of algorithms can be reduced; Please also make error handling better, we do not want the bot
+ * to stop running just because of an error.
  */
  
-const GameFunctions = require('./GameFunctions.js'); // modules included and global variables defined.
+ /**
+  * Global variables and module imports defined.
+  */
+
+const GameFunctions = require('./GameFunctions.js'); 
 const MusicFunctions = require('./MusicFunctions.js');
 const MiscFunctions = require('./MiscFunctions.js');
 const Discord = require('discord.js');
