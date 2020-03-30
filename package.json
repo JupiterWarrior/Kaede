@@ -1,7 +1,7 @@
 {
   "name": "kaede",
   "version": "1.0.0",
-  "description": "Bot for anime, music, mobile game stats, virtual 2D girl and lots of others ",
+  "description": "Bot for anime, music, mobile/console/PC game stats, calculator, translator, AI voice recognition",
   "main": "Kaede.js",
   "author": "Elbert Ng & Jamie Sebastian",
   "side_author": "Tiffany Prayitno, Andrew Rusli & Clarice Osmond",
