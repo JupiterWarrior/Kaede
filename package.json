@@ -4,6 +4,7 @@
   "description": "Bot for anime, music, mobile game stats, virtual 2D girl and lots of others ",
   "main": "Kaede.js",
   "author": "Elbert Ng & Jamie Sebastian",
+  "side_author": "Tiffany Prayitno, Andrew Rusli & Clarice Osmond",
   "dependencies": {
     "discord.js": "^11.5.1",
     "ffmpeg": "0.0.4",

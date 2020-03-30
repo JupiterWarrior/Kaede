@@ -1,3 +1,10 @@
+/**
+ * Main javascript file for the Kaede bot.
+ * COPYRIGHT 2020 Elbert Ng, Jamie Sebastian ALL RIGHTS RESERVED.
+ * Note from Elbert : Please check for the running times of certain algorithms in the code and see
+ * whether the asymptotic running times of algorithms can be reduced
+ */
+ 
 const GameFunctions = require('./GameFunctions.js'); // modules included and global variables defined.
 const MusicFunctions = require('./MusicFunctions.js');
 const MiscFunctions = require('./MiscFunctions.js');
@@ -5,10 +12,10 @@ const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
 const bot = new Discord.Client();
 const fs = require('fs');
-let gameInProgress = false;
-const queue = new Map();
+let gameInProgress = false; // flag used to pause all actions when a game is in progress
+const queue = new Map(); // queue used to map servers to a certain 'serverQueue' for music
 
-/* bot properties when bot is on */
+/* What bot does when its "READY" */
 bot.once('ready', () => {
     console.log('Kaede is at your service.'); 
     bot.user.setPresence({
@@ -19,26 +26,26 @@ bot.once('ready', () => {
         }
     }); 
 })
-
+/* Take actions when messages start with '^' and then execute if any commands satisfy the bot's available commands */
 bot.on('message', async message => {
-    if (message.content.substring(0, 1) === prefix && !message.author.bot) {
+    if (message.content.substring(0, 1) === prefix && !message.author.bot) { //check prefix
         var firstcmd = "help"
         if (message.content.length !== 1) {
             var arr = message.content.substring(1).split(' ');
             var firstcmd = arr[0];
             for (i = 0; i < arr.length; i++) {
                 arr[i] = arr[i].toLowerCase();
-            }
-        }
-        const serverQueue = queue.get(message.guild.id);
+            } // split message in arrays where each element is classified by white spaces
+        } // strings are also lower-cased to make case insensitive commands
+        const serverQueue = queue.get(message.guild.id); // get the value associated with the server key
         switch (firstcmd) {
             case "help":
-                message.channel.send("in progress");
+                message.channel.send("in progress"); // A RichEmbed structure that displays all the commands of kaede
                 break;
             case "test":
-                message.channel.send("hellooo <3");
+                message.channel.send("hellooo <3"); // used for debugging, and etc ( temporary CMD )
                 break;
-            case "game":
+            case "game": 
                 if (!gameInProgress) {
                     if (arr.length === 1) {
                         message.channel.send(
@@ -133,17 +140,20 @@ bot.on('message', async message => {
                         var songStr = "";
                         for (i = 3; i < arr.length; ++i) {
                             songStr = songStr + arr[i] + " ";
-                        }
-                        songStr = songStr.trim();
+                        } 
+                        songStr = songStr.trim(); // combining the song name from separate array elements back t string
                         //console.log(songStr);
                         MusicFunctions.addToPlaylist(message, arr[2], songStr);
+                        break;
+                    case "remove":
+                        //TBD: if possible tiff do this so get familiar
                         break;
                     default:
                         message.channel.send("This command is not in Kaede's playlist commands!!");
                         break;
                 }
                 break;
-            case "profile":
+            case "profile": // used to display game profile stats by accessing appropriate JSON file
                 fs.readFile('KaedeGameStats.json', 'utf8', (error, data) => {
                     if (error){
                         console.log(err);
@@ -163,10 +173,10 @@ bot.on('message', async message => {
                 }});
                 break;
             default:
-                message.channel.send("This is not a valid command.\nType ^ or ^help for Kaede's Kawaii commands! :heart:");
+                message.channel.send("This is not a valid command.\nType ^ or ^help for Kaede's Kawaii commands! :heart:"); // if no commands match
                 break;
         }
     }
 })
 
-bot.login(token);
+bot.login(token); //Login to bot
