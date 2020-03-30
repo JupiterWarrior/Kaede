@@ -1,4 +1,19 @@
-module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, queue, repeat, remove, first, swap, previous}
+/*To do music commands:
+// playlist commands to do( playlists are stored in json file for certain diff servers) *implementation of a 4D array*
+Shuffle ( shuffles the playlist )
+remove (from playlist)
+delete (delete playlist completely)
+rename ( rename the playlist )
+list (show the songs in a particular playlist)
+playlists (show all playlists in server)
+// Additional stuff
+TBD: add a next page icon for selection of songs ( make it top 15 or top 20)
+TBD: add a password and higher security level for validations of deleting playlist or renaming playlist when doing playlists function
+Idea: ASK for password through personal messaging by bot when deleting a certain playlist.
+NOTE: playlists can only be modified by the author who created it.
+*/
+module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
+queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist}
 
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
@@ -7,6 +22,7 @@ const querystring = require('querystring');
 const entities = require('html-entities').AllHtmlEntities;
 const https = require('https');
 const BASE_URL = 'https://www.youtube.com/results?';
+const fs = require('fs');
 var prev;
 
 async function play(message, serverQueue, queue) {
@@ -370,27 +386,102 @@ async function previous(message, serverQueue) {
     serverQueue.songs.push(prev);
     message.channel.send("Kaede has added " + prev.title + " back into the queue!");
 }
-async function lyrics(message, serverQueue) {
-
-}
-async function moveTo(message, serverQueue, time) {
-
-}
-/*To do music commands:
-Lyrics ( lyrics for song )
-MoveTo ( move to a certain time in the youtube vid )
-// playlist commands ( playlists are stored in json file for certain diff servers.)
-Playlist ( creates a playlist )
-Shuffle ( shuffles the playlist )
-add (adding to playlist)
-remove (from playlist)
-list (show playlist)
-playlists (show all playlists in server)
-*/
 
 /* Playlist functions */
-class playlist {
-    // jamie shud i create a class or just functions
+function createPlaylist(message, name) {
+    fs.readFile('Playlists.json', 'utf8', async (error, data) => {
+        if (error){
+            console.log(error);
+        } 
+        else {
+            playlists = JSON.parse(data);
+            if (!playlists[message.guild.id]) {
+                playlists[message.guild.id] = {};
+            }
+            if (!playlists[message.guild.id][message.author.id]) {
+                playlists[message.guild.id][message.author.id] = {};
+            }
+            if (!playlists[message.guild.id][message.author.id][name]) {
+                playlists[message.guild.id][message.author.id][name] = [];
+            }
+            else {
+                message.channel.send("Kaede has already created a playlist with this name!");
+                return;
+            }
+            playlists[message.guild.id][message.author.id][name] = []; //4D array with server, author, name of playlist and songs as its dimensions
+            json_format_string = JSON.stringify(playlists);
+            fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
+                if (error) {
+                    console.log(error);
+                }
+            });
+            message.channel.send("Kaede has created a playlist of name " + name + ", requested by " + message.author.username + "!");
+        }
+    })
+}
+function addToPlaylist(message, playlistName, songName) {
+    fs.readFile('Playlists.json', 'utf8', async (error, data) => {
+        if (error){
+            console.log(error);
+        } 
+        else {
+            playlists = JSON.parse(data);
+            if (!playlists[message.guild.id]) {
+                message.channel.send("Kaede cannot find any playlists in this server!");
+                return;
+            }
+            if (!playlists[message.guild.id][message.author.id]) {
+                message.channel.send("Kaede cannot find any playlists created by " + message.author.username + "!");
+                return;
+            }
+            if (!playlists[message.guild.id][message.author.id][playlistName]) {
+                message.channel.send("Kaede cannot find a playlist with the name " + playlistName + "!");
+                return;
+            }
+            let songInfo;
+            try {
+                songInfo = await getYoutubeInfo(songName);
+            } catch (error) {
+                message.channel.send("Kaede cannot find any songs with that title!");
+                return;
+            }
+            const songInfoEmbed = new Discord.RichEmbed().setColor(
+            '#F8C300').setTitle('Top 5 songs to be added to playlist').setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
+            'https://manga.tokyo/wp-content/uploads/2019/12/5dea5f4fecea9.jpg')
+            .setDescription('Kaede does not know what you want to put in! So you choose...').addField(
+            'Song number 1', songInfo[0].title, false).addField(
+            'Song number 2', songInfo[1].title, false).addField(
+            'Song number 3', songInfo[2].title, false).addField(
+            'Song number 4', songInfo[3].title, false).addField(
+            'Song number 5', songInfo[4].title, false).setFooter(
+            'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
+            const chooseFilter = m => {
+                let choice = Number(m.content);
+                let cond =  m.author.id === message.author.id && !isNaN(choice);
+                return cond && choice >= 1 && choice <= 5 && Number.isInteger(choice);
+            }
+            message.channel.send(songInfoEmbed);
+            try {
+                let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: 30000, errors : ['time']});
+                var index = Number(collected.first().content);
+            } catch (error){
+                message.channel.send("Kaede waited too long for this!");
+                return;
+            }
+            const songData = {
+                title : songInfo[index - 1].title,
+                url : songInfo[index - 1].link,
+            };
+            playlists[message.guild.id][message.author.id][playlistName].push(songData);
+            json_format_string = JSON.stringify(playlists);
+            fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
+                if (error) {
+                    console.log(error);
+                }
+            });
+            message.channel.send("Kaede has added a song of name " + songData.title + " to the playlist " + playlistName + "!");
+        }
+    });
 }
 
 /* Helper Functions to help getting the youtube top 5 URL for the play function */
@@ -476,7 +567,7 @@ function removeHtml(string) {
             .replace(/<.*?>/gi, ''),
         ).trim();
 }
-
+// get the HTML page of a certain URL link
 function getPage(link, callback) {
   const request = https.get(link, resp => {
     if (resp.statusCode !== 200) return callback(new Error(`Status Code ${resp.statusCode}`));

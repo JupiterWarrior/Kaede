@@ -131,6 +131,23 @@ bot.on('message', async message => {
                         case "previous":
                             MusicFunctions.previous(message, serverQueue);
                             break;
+                        case "playlist":
+                        case "plist":
+                            MusicFunctions.createPlaylist(message, arr[2]);
+                            break;
+                        case "add":
+                            if (arr.length == 3) {
+                                message.channel.send("Please choose a song name!");
+                                break;
+                            }
+                            var songStr = "";
+                            for (i = 3; i < arr.length; ++i) {
+                                songStr = songStr + arr[i] + " ";
+                            }
+                            songStr = songStr.trim();
+                            console.log(songStr);
+                            MusicFunctions.addToPlaylist(message, arr[2], songStr);
+                            break;
                         default:
                             message.channel.send("This command is not in Kaede's music commands!!");
                             break;
