@@ -43,7 +43,7 @@ var prev;
  */
 async function play(message, serverQueue, queue) {
     const song = message.content.substring(6); //takes the string of message from excluding '^play '
-    const voiceChannel = message.member.voiceChannel;
+    const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
         message.channel.send("Kaede cannot play music if you are not in a voice channel!");
         return;
@@ -62,7 +62,7 @@ async function play(message, serverQueue, queue) {
         message.channel.send("Kaede cannot find any songs with that title!");
         return;
     }
-    const songInfoEmbed = new Discord.RichEmbed().setColor(
+    const songInfoEmbed = new Discord.MessageEmbed().setColor(
     'AQUA').setTitle('Top 5 songs').setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
     'https://vignette.wikia.nocookie.net/assassination-classroom/images/f/f0/Kaede_kayano_Profil.jpg/revision/latest/top-crop/width/360/height/450?cb=20160304163916&path-prefix=de')
     .setDescription('Kaede does not know what you want! So you choose...').addField(
@@ -168,7 +168,7 @@ async function dispatchSong(message, song, queue) {
             return;
         }
     } else {
-        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => { 
+        const dispatcher = serverQueue.connection.play(ytdl(song.url)).on('finish', () => { 
             if (!serverQueue.looping && !serverQueue.repeating) { // on end of stream, check whether it is looping or repeating ( to check whether array is shifted or not )
                 prev = serverQueue.songs[0];
                 serverQueue.songs.shift();
@@ -198,7 +198,7 @@ function skip(message, serverQueue) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
-    serverQueue.connection.dispatcher.end();
+    serverQueue.connection.dispatcher.destroy();
     message.channel.send("Kaede Skip!")
 }
 
@@ -217,7 +217,7 @@ function skipAll(message, serverQueue) {
         return;
     }
     serverQueue.songs = [];
-    serverQueue.connection.dispatcher.end();
+    serverQueue.connection.dispatcher.destroy();
     message.channel.send("Kaede skip all!");
 }
 
