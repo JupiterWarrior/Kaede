@@ -3,7 +3,8 @@
  * COPYRIGHT 2020 Elbert Ng, Jamie Sebastian ALL RIGHTS RESERVED.
  * Note from Elbert : Please check for the running times of certain algorithms in the code and see
  * whether the asymptotic running times of algorithms can be reduced; Please also make error handling better, we do not want the bot
- * to stop running just because of an error.
+ * to stop running just because of an error; Messages sent in the channel should be neater, more professional-looking and if possible, implement 
+ * RichEmbed objects.
  */
  
  /**
@@ -20,7 +21,9 @@ const fs = require('fs');
 let gameInProgress = false; // flag used to pause all actions when a game is in progress
 const queue = new Map(); // queue used to map servers to a certain 'serverQueue' for music
 
-/* What bot does when its "READY" */
+/**
+ *  What bot does when its "READY" 
+ */
 bot.once('ready', () => {
     console.log('Kaede is at your service.'); 
     bot.user.setPresence({

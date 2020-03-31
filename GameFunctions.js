@@ -15,8 +15,8 @@ const fs = require('fs');
 
 /**
  * Helper function used to increment the game wins of the user for certain games. 
- * @param {*} playerId the unique id of the discord user.
- * @param {*} gameStat the game stat string to be updated on.
+ * @param {String} playerId the unique id of the discord user.
+ * @param {String} gameStat the game stat string to be updated on.
  */
 async function incrementGameWins(playerId, gameStat) {
     fs.readFile('KaedeGameStats.json', 'utf8', async (error, data) => {
@@ -43,9 +43,9 @@ async function incrementGameWins(playerId, gameStat) {
 
 /**
  * Helper function to update the highscore of the user for certain games.
- * @param {*} playerId the unique id of the discord user.
- * @param {*} newScore the new score the user just got.
- * @param {*} gameStat the game stat string to be updated on.
+ * @param {String} playerId the unique id of the discord user.
+ * @param {Number} newScore the new score the user just got.
+ * @param {String} gameStat the game stat string to be updated on.
  */
 
 async function checkForHighscore(playerId, newScore, gameStat) {
@@ -73,7 +73,7 @@ async function checkForHighscore(playerId, newScore, gameStat) {
 
 /**
  * The game function for the rock, paper & scissors game.
- * @param {*} message the message object sent to play the game.
+ * @param {Object} message the message object sent to play the game.
  */
 async function rps(message) {
     const rpsenum = {
@@ -135,7 +135,7 @@ async function rps(message) {
 }
 /**
  * The game function implementation for guess the number between 1-10.
- * @param {*} message message object sent in order to play the game
+ * @param {Object} message message object sent in order to play the game
  */
 async function guessNumber(message) {
     const filter = m => {
@@ -178,7 +178,7 @@ async function guessNumber(message) {
 }
 /**
  * The game function used in the implementation of most math questions answered.
- * @param {*} message message object sent to play the game.
+ * @param {Object} message message object sent to play the game.
  */
 async function mostMath(message) {
     const openum = {
@@ -256,7 +256,7 @@ async function mostMath(message) {
 }
 /**
  * Game implementation for blackjack in kaede bot.
- * @param {*} message message object sent in order to play the game.
+ * @param {Object} message message object sent in order to play the game.
  */
 async function blackJack(message) {
 

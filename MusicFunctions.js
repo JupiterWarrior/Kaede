@@ -12,8 +12,17 @@ TBD: add a password and higher security level for validations of deleting playli
 Idea: ASK for password through personal messaging by bot when deleting a certain playlist.
 NOTE: playlists can only be modified by the author who created it.
 */
+
+/**
+ * Module used to implement the Music Functions.
+ */
+
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
 queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist}
+
+/**
+ * Global variables and module imports defined.
+ */
 
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
@@ -25,14 +34,21 @@ const BASE_URL = 'https://www.youtube.com/results?';
 const fs = require('fs');
 var prev;
 
+/**
+ * The main function used to play music in the Kaede bot.
+ * Music is obtained from youtube videos.
+ * @param {Object} message the message object used to play music.
+ * @param {Object} serverQueue the queue object in the current server.
+ * @param {Map<String, Object>} queue a global map that maps servers to its queues.
+ */
 async function play(message, serverQueue, queue) {
-    const song = message.content.substring(6);
+    const song = message.content.substring(6); //takes the string of message from excluding '^play '
     const voiceChannel = message.member.voiceChannel;
     if (!voiceChannel) {
         message.channel.send("Kaede cannot play music if you are not in a voice channel!");
         return;
     }
-    const permissions = voiceChannel.permissionsFor(message.client.user);
+    const permissions = voiceChannel.permissionsFor(message.client.user); //check permissions
     if (!permissions.has('CONNECT')) {
         message.channel.send("Kaede is not allowed to join the voice channel!");
     }
@@ -41,7 +57,7 @@ async function play(message, serverQueue, queue) {
     }
     let songInfo;
     try {
-        songInfo = await getYoutubeInfo(song);
+        songInfo = await getYoutubeInfo(song); 
     } catch (error) {
         message.channel.send("Kaede cannot find any songs with that title!");
         return;
@@ -55,12 +71,12 @@ async function play(message, serverQueue, queue) {
     'Song number 3', songInfo[2].title, false).addField(
     'Song number 4', songInfo[3].title, false).addField(
     'Song number 5', songInfo[4].title, false).setFooter(
-    'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
+    'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg'); // RichEmbed object created to display top 5 songs 
     const chooseFilter = m => {
         let choice = Number(m.content);
         let cond =  m.author.id === message.author.id && !isNaN(choice);
         return cond && choice >= 1 && choice <= 5 && Number.isInteger(choice);
-    }
+    } 
     message.channel.send(songInfoEmbed);
     try {
         let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: 30000, errors : ['time']});
@@ -69,11 +85,10 @@ async function play(message, serverQueue, queue) {
         message.channel.send("Kaede waited too long for this!");
         return;
     }
-    //console.log(songInfo);
-    //console.log(index);
     const songData = {
         title : songInfo[index - 1].title,
         url : songInfo[index - 1].link,
+        description : songInfo[index - 1].description,
     };
     if (typeof serverQueue === "undefined") {
         const queueFields = { // queuefields is the same as serverQueue.
@@ -105,7 +120,7 @@ async function play(message, serverQueue, queue) {
         message.channel.send("Kaede has added " + songData.title + " to the queue!");
         if (!serverQueue.connection) {
             try {
-                var connection = await voiceChannel.join();
+                var connection = await voiceChannel.join(); //wait for Kaede to join voice channel
                 serverQueue.connection = connection;
             } catch (error) {
                 //console.log(error);
@@ -117,16 +132,22 @@ async function play(message, serverQueue, queue) {
     }
 }
 
+/**
+ * A helper function used to play the video stream and to check for next songs.
+ * @param {Object} message message object which is sent by the user to play a song.
+ * @param {Object} song the song object to be played in the stream.
+ * @param {Map<String, Object>} queue a global map used to map servers to certain serverQueues.
+ */
 async function dispatchSong(message, song, queue) {
     const serverQueue = queue.get(message.guild.id);
 
     if (!song) {
         const filter = m => {
             let theMessage = m.content.toLowerCase();
-            return theMessage.startsWith("^music play ");
+            return theMessage.startsWith("^play ");
         }
         try {
-            await message.channel.awaitMessages(filter, {max: 1, time : 120000, errors : ['time']});
+            await message.channel.awaitMessages(filter, {max: 1, time : 120000, errors : ['time']}); // Kaede waits 2 minutes for new songs to be played before leaving the voice channel
             // will trigger play from Kaede.js, we check every second until added to queue
             var checkIfPlayDone = setInterval(() => {
                 if (serverQueue.songs && serverQueue.songs[0]) {
@@ -147,8 +168,8 @@ async function dispatchSong(message, song, queue) {
             return;
         }
     } else {
-        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
-            if (!serverQueue.looping && !serverQueue.repeating) {
+        const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => { 
+            if (!serverQueue.looping && !serverQueue.repeating) { // on end of stream, check whether it is looping or repeating ( to check whether array is shifted or not )
                 prev = serverQueue.songs[0];
                 serverQueue.songs.shift();
             }
@@ -163,7 +184,11 @@ async function dispatchSong(message, song, queue) {
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
     }
 }
-
+/**
+ * Music function implemented to skip songs for the Kaede bot.
+ * @param {Object} message message object sent to skip a song.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function skip(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip unless you're in a voice channel !");
@@ -177,6 +202,11 @@ function skip(message, serverQueue) {
     message.channel.send("Kaede Skip!")
 }
 
+/**
+ * Music function implemented to skip all the songs in the server queue.
+ * @param {Object} message message object sent to skip all the songs.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function skipAll(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
@@ -191,6 +221,11 @@ function skipAll(message, serverQueue) {
     message.channel.send("Kaede skip all!");
 }
 
+/**
+ * Music function implemented to pause the music.
+ * @param {Object} message message object sent to pause the music.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function pause(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot pause unless you're in a voice channel !");
@@ -209,6 +244,11 @@ function pause(message, serverQueue) {
     message.channel.send("Kaede pause!");
 }
 
+/**
+ * Music function implemented to resume (unpause) the music.
+ * @param {Object} message message object sent to unpause the music.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function resume(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot resume unless you're in a voice channel !");
@@ -227,6 +267,11 @@ function resume(message, serverQueue) {
     message.channel.send("Kaede resume!");
 }
 
+/**
+ * Music function implemented to loop the currently playing song.
+ * @param {Object} message message object sent to loop the song.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function loop(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot start looping songs unless you're in a voice channel !");
@@ -245,6 +290,11 @@ function loop(message, serverQueue) {
     }
 }
 
+/**
+ * Music function implemented to display the currently playing song
+ * @param {Object} message message object sent to show the "now playing"
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function nowPlaying(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
@@ -258,6 +308,11 @@ function nowPlaying(message, serverQueue) {
     message.channel.send("Kaede is currently playing " + serverQueue.songs[0].title);
 }
 
+/**
+ * Music function implemented to show the queue of songs.
+ * @param {Object} message message object sent to display the queue.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function queue(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
@@ -275,6 +330,11 @@ function queue(message, serverQueue) {
     message.channel.send(songsQueueMessage);
 }
 
+/**
+ * Music function implemented to repeat the song. Repeating the song only repeats the song once.
+ * @param {Object} message message object sent to repeat the music.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function repeat(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot start repeating songs unless you're in a voice channel !");
@@ -295,7 +355,12 @@ function repeat(message, serverQueue) {
     message.channel.send("Kaede repeat!");
     serverQueue.repeating = true;
 }
-
+/**
+ * Music function implemented to remove a certain song from the queue. The song must not be currently playing.
+ * @param {Object} message message object sent to remove a song from the queue.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ * @param {Number} index the index of the song in the queue.
+ */
 function remove(message, serverQueue, index) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot remove a song unless you're in a voice channel !");
@@ -316,7 +381,12 @@ function remove(message, serverQueue, index) {
     serverQueue.songs.splice(index, 1);
     message.channel.send("Kaede remove!");
 }
-
+/**
+ * Music function implemented to prioritize a certain song from the queue. 
+ * @param {Object} message message object sent to prioritize a particular song.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ * @param {Number} index the index of the song in the queue.
+ */
 function first(message, serverQueue, index) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot prioritize a song unless you're in a voice channel !");
@@ -344,6 +414,13 @@ function first(message, serverQueue, index) {
     serverQueue.songs[index] = temp;
 }
 
+/**
+ * Music function implemented to swap the 2 positions of songs in the queue.
+ * @param {Object} message message object sent to swap 2 songs.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ * @param {Number} index1 the index position of the first song.
+ * @param {Number} index2 the index position of the second song.
+ */
 function swap(message, serverQueue, index1, index2) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot swap 2 songs unless you're in a voice channel !");
@@ -370,6 +447,13 @@ function swap(message, serverQueue, index1, index2) {
     serverQueue.songs[index2] = temp;
     message.channel.send("Kaede Swap!");
 }
+
+/**
+ * Music function implemented to add the previously played song back into the queue. If the previous song is undefined, then no song will be
+ * added into the queue.
+ * @param {Object} message message object sent to add the previous song
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ */
 function previous(message, serverQueue) {
     if (!message.member.voiceChannel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
@@ -388,6 +472,12 @@ function previous(message, serverQueue) {
 }
 
 /* Playlist functions */
+
+/**
+ * Function to create a playlist of songs and store the playlist inside a JSON file.
+ * @param {Object} message message object sent to create the playlist.
+ * @param {String} name the name of the playlist to be created.
+ */
 async function createPlaylist(message, name) {
     fs.readFile('Playlists.json', 'utf8', async (error, data) => {
         if (error){
@@ -419,6 +509,13 @@ async function createPlaylist(message, name) {
         }
     })
 }
+
+/**
+ * Function to add a particular song into the a specific playlist. Only the author of the playlist can add song to the playlist.
+ * @param {Object} message message object sent to add a song to the playlist.
+ * @param {String} playlistName the name of the playlist to add the song into.
+ * @param {String} songName the name of song to be added.
+ */
 async function addToPlaylist(message, playlistName, songName) {
     fs.readFile('Playlists.json', 'utf8', async (error, data) => {
         if (error){
@@ -435,7 +532,7 @@ async function addToPlaylist(message, playlistName, songName) {
                 return;
             }
             if (!playlists[message.guild.id][message.author.id][playlistName]) {
-                message.channel.send("Kaede cannot find a playlist with the name " + playlistName + "!");
+                message.channel.send("Kaede cannot find any playlists created by " + message.author.username + " with the name " + playlistName + "!");
                 return;
             }
             let songInfo;
@@ -446,7 +543,7 @@ async function addToPlaylist(message, playlistName, songName) {
                 return;
             }
             const songInfoEmbed = new Discord.RichEmbed().setColor(
-            '#F8C300').setTitle('Top 5 songs to be added to playlist').setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
+            '#F8C300').setTitle('Top 5 songs to be added to playlist').setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage( //create a RichEmbed to display top 5 songs.
             'https://manga.tokyo/wp-content/uploads/2019/12/5dea5f4fecea9.jpg')
             .setDescription('Kaede does not know what you want to put in! So you choose...').addField(
             'Song number 1', songInfo[0].title, false).addField(
@@ -470,7 +567,7 @@ async function addToPlaylist(message, playlistName, songName) {
             }
             const songData = {
                 title : songInfo[index - 1].title,
-                url : songInfo[index - 1].link,
+                url : songInfo[index - 1].link, // please note that in playlist we dont create a property of description since JSON file has a limited memory space.
             };
             playlists[message.guild.id][message.author.id][playlistName].push(songData);
             json_format_string = JSON.stringify(playlists);
@@ -484,11 +581,14 @@ async function addToPlaylist(message, playlistName, songName) {
     });
 }
 
-/* Helper Functions to help getting the youtube top 5 URL for the play function */
+/**
+ * Helper Functions to help getting the youtube top 5 URL for the play function (most are referrenced from other codes)
+ */
 
 // code referenced from https://github.com/TimeForANinja/node-ytsr/blob/master/lib
+
 async function getYoutubeInfo(searchString, callback = null) {
-    if (!callback) {
+    if (!callback) { // returning callback since async await does not work here
         return new Promise((resolve, reject) => {
             getYoutubeInfo(searchString, (err, info) => {
                 if (err) return reject(err);
@@ -496,7 +596,7 @@ async function getYoutubeInfo(searchString, callback = null) {
             });
         });
     }
-    const link = BASE_URL + querystring.encode({
+    const link = BASE_URL + querystring.encode({ //encode for language and region
         search_query: searchString,
         spf: 'navigate',
         gl: 'CA',
@@ -525,12 +625,13 @@ async function getYoutubeInfo(searchString, callback = null) {
             })
             .map(item => parseItem(item))
             .filter(item => item) // removes null
-            .filter((item, index) => index < 5);
+            .filter((item, index) => index < 5); //filter to 5
         return callback(null, items);
     });
 }
 
 // Start of parsing an item, only want type video
+
 function parseItem(item) {
   const titles = between(item, '<div class="', '"');
   const type = between(titles, 'yt-lockup yt-lockup-tile yt-lockup-', ' ');
@@ -546,6 +647,7 @@ function parseItem(item) {
 };
 
 // Taken from https://github.com/fent/node-ytdl-core/
+
 function between(haystack, left, right) {
   let pos;
   pos = haystack.indexOf(left);
@@ -559,6 +661,7 @@ function between(haystack, left, right) {
 };
 
 // Cleans up html text
+
 function removeHtml(string) {
     return new entities().decode(
         string.replace(/\n/g, ' ')
@@ -568,6 +671,7 @@ function removeHtml(string) {
         ).trim();
 }
 // get the HTML page of a certain URL link
+
 function getPage(link, callback) {
   const request = https.get(link, resp => {
     if (resp.statusCode !== 200) return callback(new Error(`Status Code ${resp.statusCode}`));
