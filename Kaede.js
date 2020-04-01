@@ -152,6 +152,9 @@ bot.on('message', async message => {
                     case "shuffle":
                         MusicFunctions.shufflePlaylist(message, arr[2], serverQueue, queue);
                         break;
+                    case "names":
+                        MusicFunctions.showPlaylists(message);
+                        break;
                     default:
                         message.channel.send("This command is not in Kaede's playlist commands!!");
                         break;
@@ -162,7 +165,7 @@ bot.on('message', async message => {
                     if (error){
                         console.log(err);
                     } else {
-                    gameStatsObj = JSON.parse(data);
+                    let gameStatsObj = JSON.parse(data);
                         
                     let playerId = message.author.id;
                     if (!gameStatsObj[playerId]) {

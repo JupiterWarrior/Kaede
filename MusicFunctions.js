@@ -17,7 +17,8 @@ NOTE: playlists can only be modified by the author who created it and playlists 
  */
 
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
-queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist, shufflePlaylist}
+queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist, shufflePlaylist,
+showPlaylists}
 
 /* Constant definitions */
 const MEGABYTES_32 = 1 << 25;
@@ -520,7 +521,7 @@ function createPlaylist(message, name) {
         message.channel.send("Kaede does not know what name the playlist should be created with!");
         return;
     }
-    fs.readFile('Playlists.json', 'utf8', async (error, data) => {
+    fs.readFile('playlists.json', 'utf8', async (error, data) => {
         if (error){
             console.log(error);
         } 
@@ -537,7 +538,7 @@ function createPlaylist(message, name) {
                 return;
             }
             json_format_string = JSON.stringify(playlists);
-            fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
+            fs.writeFile('playlists.json', json_format_string, 'utf8', (error) => {
                 if (error) {
                     console.log(error);
                 }
@@ -567,7 +568,7 @@ async function addToPlaylist(message, arr) {
         message.channel.send("Kaede does not know what the name of the song is!");
         return;
     }
-    fs.readFile('Playlists.json', 'utf8', async (error, data) => {
+    fs.readFile('playlists.json', 'utf8', async (error, data) => {
         if (error){
             console.log(error);
         } 
@@ -627,7 +628,7 @@ async function addToPlaylist(message, arr) {
             }
             playlists[message.author.id][playlistName].push(songData);
             json_format_string = JSON.stringify(playlists);
-            fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
+            fs.writeFile('playlists.json', json_format_string, 'utf8', (error) => {
                 if (error) {
                     console.log(error);
                 }
@@ -649,8 +650,8 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
         message.channel.send("Kaede cannot shuffle the playlist if you're not in a voice channel!");
         return;
     }
-    fs.readFile('Playlists.json', 'utf8', async (error, data) => {
-        if (error){
+    fs.readFile('playlists.json', 'utf8', async (error, data) => {
+        if (error) {
             console.log(error);
         } 
         else {
@@ -718,6 +719,31 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
                 }
             }
         }
+    });
+}
+
+async function showPlaylists(message) {
+    fs.readFile('playlists.json', 'utf-8', (error, data) => {
+        if (error) {
+            console.log(error);
+            return;
+        }
+        const songInfoEmbed = new Discord.MessageEmbed().setColor(
+            '#F8C300').setTitle('Playlists of ' + message.author.username).setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
+            'https://manga.tokyo/wp-content/uploads/2019/12/5dea5f4fecea9.jpg').setFooter(
+            'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
+        // RichEmbed object created to display the author's playlists
+        let playlistDataObj = JSON.parse(data);
+        if (playlistDataObj && playlistDataObj[message.author.id]) {
+            let i = 1;
+            for (let playlistName in playlistDataObj[message.author.id]) {
+                songInfoEmbed.addField("Playlist number " + i, playlistName, false);
+                ++i;
+            }
+        } else {
+            songInfoEmbed.setDescription('Kaede cannot find any playlists you made!');
+        }
+        message.channel.send(songInfoEmbed);
     });
 }
 
