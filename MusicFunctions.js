@@ -361,7 +361,7 @@ function repeat(message, serverQueue) {
  * Music function implemented to remove a certain song from the queue. The song must not be currently playing.
  * @param {Object} message message object sent to remove a song from the queue.
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
- * @param {Array<String>} indexArr the indexes of the song in the queue to remove.
+ * @param {string[]} indexArr the indexes of the song in the queue to remove.
  */
 function remove(message, serverQueue, indexArr) {
     if (!message.member.voice.channel) {
