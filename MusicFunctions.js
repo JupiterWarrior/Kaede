@@ -222,8 +222,7 @@ function skipAll(message, serverQueue) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
-    prev = serverQueue.songs[0];
-    serverQueue.songs = [];
+    serverQueue.songs = [serverQueue.songs[0]];
     serverQueue.connection.dispatcher.end();
     message.channel.send("Kaede skip all!");
 }
