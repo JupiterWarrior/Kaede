@@ -32,6 +32,7 @@ const entities = require('html-entities').AllHtmlEntities;
 const https = require('https');
 const BASE_URL = 'https://www.youtube.com/results?';
 const fs = require('fs');
+const MEGABYTES_32 = 1 << 25;
 var prev;
 
 /**
@@ -168,7 +169,7 @@ async function dispatchSong(message, song, queue) {
             return;
         }
     } else { 
-        const dispatcher = serverQueue.connection.play(ytdl(song.url), {highWaterMark : 512});
+        const dispatcher = serverQueue.connection.play(ytdl(song.url, {highWaterMark : MEGABYTES_32}));
         dispatcher.on('finish', () => { 
             if (!serverQueue.looping && !serverQueue.repeating) { // on end of stream, check whether it is looping or repeating ( to check whether array is shifted or not )
                 prev = serverQueue.songs[0];
