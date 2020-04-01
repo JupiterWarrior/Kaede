@@ -167,8 +167,9 @@ async function dispatchSong(message, song, queue) {
             message.channel.send("Kaede's bored.. Leaving now!");
             return;
         }
-    } else {
-        const dispatcher = serverQueue.connection.play(ytdl(song.url)).on('finish', () => { 
+    } else { 
+        const dispatcher = serverQueue.connection.play(ytdl(song.url), {highWaterMark : 512});
+        dispatcher.on('finish', () => { 
             if (!serverQueue.looping && !serverQueue.repeating) { // on end of stream, check whether it is looping or repeating ( to check whether array is shifted or not )
                 prev = serverQueue.songs[0];
                 serverQueue.songs.shift();
@@ -190,7 +191,7 @@ async function dispatchSong(message, song, queue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function skip(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot skip unless you're in a voice channel !");
         return;
     }
@@ -198,7 +199,7 @@ function skip(message, serverQueue) {
         message.channel.send("There's no song for Kaede to skip!");
         return;
     }
-    serverQueue.connection.dispatcher.destroy();
+    serverQueue.connection.dispatcher.end();
     message.channel.send("Kaede Skip!")
 }
 
@@ -208,7 +209,7 @@ function skip(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function skipAll(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
         return;
     }
@@ -217,7 +218,7 @@ function skipAll(message, serverQueue) {
         return;
     }
     serverQueue.songs = [];
-    serverQueue.connection.dispatcher.destroy();
+    serverQueue.connection.dispatcher.end();
     message.channel.send("Kaede skip all!");
 }
 
@@ -227,7 +228,7 @@ function skipAll(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function pause(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot pause unless you're in a voice channel !");
         return;
     }
@@ -250,7 +251,7 @@ function pause(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function resume(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot resume unless you're in a voice channel !");
         return;
     }
@@ -273,7 +274,7 @@ function resume(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function loop(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot start looping songs unless you're in a voice channel !");
         return;
     }
@@ -296,7 +297,7 @@ function loop(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function nowPlaying(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
         return;
     }
@@ -314,7 +315,7 @@ function nowPlaying(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function queue(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot show the songs playing unless you're in a voice channel !");
         return;
     }
@@ -336,7 +337,7 @@ function queue(message, serverQueue) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function repeat(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot start repeating songs unless you're in a voice channel !");
         return;
     }
@@ -362,7 +363,7 @@ function repeat(message, serverQueue) {
  * @param {Number} index the index of the song in the queue.
  */
 function remove(message, serverQueue, index) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot remove a song unless you're in a voice channel !");
         return;
     }
@@ -388,7 +389,7 @@ function remove(message, serverQueue, index) {
  * @param {Number} index the index of the song in the queue.
  */
 function first(message, serverQueue, index) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot prioritize a song unless you're in a voice channel !");
         return;
     }
@@ -422,7 +423,7 @@ function first(message, serverQueue, index) {
  * @param {Number} index2 the index position of the second song.
  */
 function swap(message, serverQueue, index1, index2) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot swap 2 songs unless you're in a voice channel !");
         return;
     }
@@ -455,12 +456,12 @@ function swap(message, serverQueue, index1, index2) {
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
  */
 function previous(message, serverQueue) {
-    if (!message.member.voiceChannel) {
+    if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
         return;
     }
-    if (!serverQueue || !serverQueue.songs || serverQueue.songs.length == 0) {
-        message.channel.send("There's no song for Kaede to skip!");
+    if (!serverQueue) {
+        message.channel.send("Kaede has already disconnected from the voice channel!");
         return;
     }
     if (!prev) {

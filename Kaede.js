@@ -28,7 +28,7 @@ bot.once('ready', () => {
     console.log('Kaede is at your service.'); 
     bot.user.setPresence({
         status: "online",
-        game : {
+        activities : {
             name : "^help",
             type : "PLAYING",
         }
