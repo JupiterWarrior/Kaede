@@ -209,8 +209,8 @@ async function mostMath(message) {
             else {
                 op = "*";
             }
-            let num1 = MiscFunctions(-9, 9);
-            let num2 = MiscFunctions(-9, 9);
+            let num1 = MiscFunctions.randInt(-9, 9);
+            let num2 = MiscFunctions.randInt(-9, 9);
             if (op === openum.ADD) {
                 actualAns = num1 + num2;
             }
