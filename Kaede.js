@@ -125,7 +125,7 @@ bot.on('message', async message => {
                 break;
             case "rem":
             case "remove":
-                MusicFunctions.remove(message, serverQueue, Number(arr[1]));
+                MusicFunctions.remove(message, serverQueue, arr.splice(1));
                 break;
             case "f":
             case "first":
@@ -150,7 +150,6 @@ bot.on('message', async message => {
                             songStr = songStr + arr[i] + " ";
                         } 
                         songStr = songStr.trim(); // combining the song name from separate array elements back t string
-                        //console.log(songStr);
                         MusicFunctions.addToPlaylist(message, arr[2], songStr);
                         break;
                     case "remove":

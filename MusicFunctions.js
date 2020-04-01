@@ -360,9 +360,9 @@ function repeat(message, serverQueue) {
  * Music function implemented to remove a certain song from the queue. The song must not be currently playing.
  * @param {Object} message message object sent to remove a song from the queue.
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
- * @param {Number} index the index of the song in the queue.
+ * @param {Array<String>} indexArr the indexes of the song in the queue to remove.
  */
-function remove(message, serverQueue, index) {
+function remove(message, serverQueue, indexArr) {
     if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot remove a song unless you're in a voice channel !");
         return;
@@ -371,16 +371,40 @@ function remove(message, serverQueue, index) {
         message.channel.send("There's no song for Kaede to remove!");
         return;
     }
-    if ((!index && index !== 0) || isNaN(index)) { // index = 0 makes !index true
+    let invalidInput = 0;
+    let songRemoved = false;
+    let ignoredInput = 0;
+    for (var i = indexArr.length - 1; i >= 0; --i) {
+        indexArr[i] = Number(indexArr[i]);
+        if (!indexArr[i] || isNaN(indexArr[i])) {
+            invalidInput++;
+            indexArr.splice(i, 1);
+        } else if (indexArr[i] < 1 || indexArr[i] >= serverQueue.songs.length) {
+            ignoredInput++;
+            indexArr.splice(i, 1);
+
+        }
+    }
+    indexArr.sort((a, b) => b - a);
+    for (var i = 0; i < indexArr.length; ++i) {
+        songRemoved = true;
+        serverQueue.songs.splice(indexArr[i], 1);
+    }
+    if (songRemoved) {
+        let msg = "Kaede remove!";
+        if (invalidInput > 0) {
+            msg += " Kaede cannot figure out which other song" + ((invalidInput > 1) ? "s" : "") + " to remove!";
+        } else if (ignoredInput > 1) {
+            msg += " Kaede cannot find some of the songs in the queue!";
+        } else if (ignoredInput > 0) {
+            msg += " Kaede cannot find one of the songs in the queue!";
+        }
+        message.channel.send(msg);
+    } else if (invalidInput > 0) {
         message.channel.send("Kaede has no idea which song to remove!");
-        return;
-    }
-    if (index < 1 || index >= serverQueue.songs.length) {
+    } else if (ignoredInput > 0) {
         message.channel.send("Kaede cannot find that song in the queue!");
-        return;
     }
-    serverQueue.songs.splice(index, 1);
-    message.channel.send("Kaede remove!");
 }
 /**
  * Music function implemented to prioritize a certain song from the queue. 
