@@ -87,7 +87,7 @@ async function rps(message) {
     while (draw) {
         try {
             let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 3, errors: ['time']});
-            let kaedechoice = Math.ceil(Math.random() * 3);
+            let kaedechoice = MiscFunctions.randInt(1, 3);
             if (kaedechoice === 1) {
                 message.channel.send("rock!");
             }
@@ -144,7 +144,7 @@ async function guessNumber(message) {
     }
     message.channel.send("You have 3 chances to guess Kaede's number! It's between 1 and 10 <:tachi_smile:683109333621669912> Hehehe, you'll never guess it!");
     let guessesLeft = 3;
-    let correctNumber = Math.floor(Math.random() * 10 + 1); // create a random between 1-10
+    let correctNumber = MiscFunctions.randInt(1, 10);
     while (guessesLeft > 0) {
         try {
             let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 3, errors: ['time']});
@@ -199,7 +199,7 @@ async function mostMath(message) {
         let actualAns;
         if (answered) {
             let op = "";
-            let num = Math.ceil(Math.random() * 3);
+            let num = MiscFunctions.randInt(1, 3);
             if (num === 1) {
                 op = "+";
             }
@@ -209,8 +209,8 @@ async function mostMath(message) {
             else {
                 op = "*";
             }
-            let num1 = Math.ceil(Math.random() * 18) - 9;
-            let num2 = Math.ceil(Math.random() * 18) - 9;
+            let num1 = MiscFunctions(-9, 9);
+            let num2 = MiscFunctions(-9, 9);
             if (op === openum.ADD) {
                 actualAns = num1 + num2;
             }
