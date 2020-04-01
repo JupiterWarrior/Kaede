@@ -144,12 +144,7 @@ bot.on('message', async message => {
                         MusicFunctions.createPlaylist(message, arr[2]);
                         break;
                     case "add":
-                        var songStr = "";
-                        for (i = 3; i < arr.length; ++i) {
-                            songStr = songStr + arr[i] + " ";
-                        } 
-                        songStr = songStr.trim(); // combining the song name from separate array elements back t string
-                        MusicFunctions.addToPlaylist(message, arr[2], songStr);
+                        MusicFunctions.addToPlaylist(message, arr);
                         break;
                     case "remove":
                         //TBD: if possible tiff do this so get familiar

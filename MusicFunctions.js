@@ -526,20 +526,16 @@ function createPlaylist(message, name) {
         } 
         else {
             playlists = JSON.parse(data);
-            if (!playlists[message.guild.id]) {
-                playlists[message.guild.id] = {};
+            if (!playlists[message.author.id]) {
+                playlists[message.author.id] = {};
             }
-            if (!playlists[message.guild.id][message.author.id]) {
-                playlists[message.guild.id][message.author.id] = {};
-            }
-            if (!playlists[message.guild.id][message.author.id][name]) {
-                playlists[message.guild.id][message.author.id][name] = [];
+            if (!playlists[message.author.id][name]) {
+                playlists[message.author.id][name] = [];  //"3D JS object array" with author, name of playlist and songs as its dimensions
             }
             else {
                 message.channel.send("Kaede has already created a playlist with this name!");
                 return;
             }
-            playlists[message.guild.id][message.author.id][name] = []; //"4D JS object array" with server, author, name of playlist and songs as its dimensions
             json_format_string = JSON.stringify(playlists);
             fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
                 if (error) {
@@ -554,10 +550,15 @@ function createPlaylist(message, name) {
 /**
  * Function to add a particular song into the a specific playlist. Only the author of the playlist can add song to the playlist.
  * @param {Object} message message object sent to add a song to the playlist.
- * @param {String} playlistName the name of the playlist to add the song into.
- * @param {String} songName the name of song to be added.
+ * @param 
  */
-async function addToPlaylist(message, playlistName, songName) {
+async function addToPlaylist(message, arr) {
+    playlistName = arr[2];
+    var songName = "";
+    for (i = 3; i < arr.length; ++i) {
+        songName = songName + arr[i] + " ";
+    } 
+    songName = songName.trim(); // combining the song name from separate array elements back t string
     if (!playlistName) {
         message.channel.send("Kaede does not know what the name of the playlist is!");
         return;
@@ -572,19 +573,15 @@ async function addToPlaylist(message, playlistName, songName) {
         } 
         else {
             playlists = JSON.parse(data);
-            if (!playlists[message.guild.id]) {
-                message.channel.send("Kaede cannot find any playlists in this server!");
-                return;
-            }
-            if (!playlists[message.guild.id][message.author.id]) {
+            if (!playlists[message.author.id]) {
                 message.channel.send("Kaede cannot find any playlists created by " + message.author.username + "!");
                 return;
             }
-            if (!playlists[message.guild.id][message.author.id][playlistName]) {
+            if (!playlists[message.author.id][playlistName]) {
                 message.channel.send("Kaede cannot find any playlists created by " + message.author.username + " with the name " + playlistName + "!");
                 return;
             }
-            if (playlists[message.guild.id][message.author.id][playlistName].length === MAX_PLAYLIST_SONGS) {
+            if (playlists[message.author.id][playlistName].length === MAX_PLAYLIST_SONGS) {
                 message.channel.send("Kaede cannot have more than 30 songs in a single playlist! The playlist is full!");
                 return;
             }
@@ -622,13 +619,13 @@ async function addToPlaylist(message, playlistName, songName) {
                 title : songInfo[index - 1].title,
                 url : songInfo[index - 1].link, // please note that in playlist we dont create a property of description since JSON file has a limited memory space.
             };
-            for (i = 0; i < playlists[message.guild.id][message.author.id][playlistName].length; ++i) {
-                if (playlists[message.guild.id][message.author.id][playlistName][i].url === songData.url) {
+            for (i = 0; i < playlists[message.author.id][playlistName].length; ++i) {
+                if (playlists[message.author.id][playlistName][i].url === songData.url) {
                     message.channel.send("Kaede already has this song in the playlist " + playlistName + "!");
                     return;
                 }
             }
-            playlists[message.guild.id][message.author.id][playlistName].push(songData);
+            playlists[message.author.id][playlistName].push(songData);
             json_format_string = JSON.stringify(playlists);
             fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
                 if (error) {
@@ -658,23 +655,19 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
         } 
         else {
             playlists = JSON.parse(data);
-            if (!playlists[message.guild.id]) {
-                message.channel.send("Kaede cannot find any playlists in this server!");
-                return;
-            }
-            if (!playlists[message.guild.id][message.author.id]) {
+            if (!playlists[message.author.id]) {
                 message.channel.send("Kaede cannot find any playlists created by " + message.author.username + "!");
                 return;
             }
-            if (!playlists[message.guild.id][message.author.id][playlistName]) {
+            if (!playlists[message.author.id][playlistName]) {
                 message.channel.send("Kaede cannot find any playlists created by " + message.author.username + " with the name " + playlistName + "!");
                 return;
             }
-            if (playlists[message.guild.id][message.author.id][playlistName].length === 0) {
+            if (playlists[message.author.id][playlistName].length === 0) {
                 message.channel.send("Kaede cannot shuffle a playlist that is empty!");
                 return;
             }
-            playlistLength = playlists[message.guild.id][message.author.id][playlistName].length;
+            playlistLength = playlists[message.author.id][playlistName].length;
             var arrRandIndex = [];
             while (arrRandIndex.length < playlistLength) {
                 let rand = Math.floor(Math.random() * playlistLength);
@@ -694,7 +687,7 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
                 };
                 queue.set(message.guild.id, queueFields);
                 for (i = 0; i < arrRandIndex.length; ++i) {
-                    queueFields.songs.push(playlists[message.guild.id][message.author.id][playlistName][arrRandIndex[i]]);
+                    queueFields.songs.push(playlists[message.author.id][playlistName][arrRandIndex[i]]);
                 }
                 //console.log(queueFields.songs);
                 message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
@@ -710,7 +703,7 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
             }
             else {
                 for (i = 0; i < arrRandIndex.length; ++i) {
-                    serverQueue.songs.push(playlists[message.guild.id][message.author.id][playlistName][arrRandIndex[i]]);
+                    serverQueue.songs.push(playlists[message.author.id][playlistName][arrRandIndex[i]]);
                 }
                 message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
                 if (!serverQueue.connection) {
