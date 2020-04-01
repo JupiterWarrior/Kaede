@@ -1,11 +1,10 @@
 /*To do music commands:
 // playlist commands to do( playlists are stored in json file for certain diff servers) *implementation of a 4D array*
-Shuffle ( shuffles the playlist )
 remove (from playlist)
 delete (delete playlist completely)
 rename ( rename the playlist )
 list (show the songs in a particular playlist)
-playlists (show all playlists in server)
+playlists (show all your playlists)
 // Additional stuff
 TBD: add a next page icon for selection of songs ( make it top 15 or top 20)
 TBD: add a password and higher security level for validations of deleting playlist or renaming playlist when doing playlists function
@@ -95,6 +94,7 @@ async function play(message, serverQueue, queue) {
         title : songInfo[index - 1].title,
         url : songInfo[index - 1].link,
     };
+    //console.log(ytdl.getInfo(songData.url));
     if (typeof serverQueue === "undefined") {
         const queueFields = { // queuefields is the same as serverQueue.
             voiceChannel : voiceChannel,
