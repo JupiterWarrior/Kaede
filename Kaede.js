@@ -7,28 +7,27 @@
  * RichEmbed objects.
  */
  
- /**
-  * Global variables and module imports defined.
-  */
-
+/* Module Imports. */
 const GameFunctions = require('./GameFunctions.js'); 
 const MusicFunctions = require('./MusicFunctions.js');
 const MiscFunctions = require('./MiscFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
-const bot = new Discord.Client();
 const fs = require('fs');
-let gameInProgress = false; // flag used to pause all actions when a game is in progress
-const queue = new Map(); // queue used to map servers to a certain 'serverQueue' for music
+
+/* Global Variables */
+const bot = new Discord.Client();
+let gameInProgress = false; // flag used to pause all actions when a game is in progress.
+const queue = new Map(); // queue used to map servers to a certain 'serverQueue' for music.
 
 /**
- *  What bot does when its "READY" 
+ *  What bot does when its "READY".
  */
 bot.once('ready', () => {
     console.log('Kaede is at your service.'); 
     bot.user.setPresence({
         status: "online",
-        activities : {
+        activity : {
             name : "^help",
             type : "PLAYING",
         }
@@ -137,7 +136,7 @@ bot.on('message', async message => {
                 break;
             case "prev":
             case "previous":
-                MusicFunctions.previous(message, serverQueue);
+                MusicFunctions.previous(message, serverQueue, queue);
                 break;
             case "playlist":
                 switch (arr[1]) {
@@ -154,6 +153,9 @@ bot.on('message', async message => {
                         break;
                     case "remove":
                         //TBD: if possible tiff do this so get familiar
+                        break;
+                    case "shuffle":
+                        MusicFunctions.shufflePlaylist(message, arr[2], serverQueue, queue);
                         break;
                     default:
                         message.channel.send("This command is not in Kaede's playlist commands!!");

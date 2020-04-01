@@ -10,7 +10,7 @@ playlists (show all playlists in server)
 TBD: add a next page icon for selection of songs ( make it top 15 or top 20)
 TBD: add a password and higher security level for validations of deleting playlist or renaming playlist when doing playlists function
 Idea: ASK for password through personal messaging by bot when deleting a certain playlist.
-NOTE: playlists can only be modified by the author who created it.
+NOTE: playlists can only be modified by the author who created it and playlists can contain no more than 30 songs.
 */
 
 /**
@@ -18,21 +18,26 @@ NOTE: playlists can only be modified by the author who created it.
  */
 
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
-queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist}
+queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist, shufflePlaylist}
 
-/**
- * Global variables and module imports defined.
- */
+/* Constant definitions */
+const MEGABYTES_32 = 1 << 25;
+const BASE_URL = 'https://www.youtube.com/results?';
+const SONG_START_INDEX = 6;
+const SERVERQUEUE_OPTIMAL_VOLUME = 5;
+const ONE_MIN = 60000;
+const MAX_PLAYLIST_SONGS = 30;
 
+/* Module imports */
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const url = require('url');
 const querystring = require('querystring');
 const entities = require('html-entities').AllHtmlEntities;
 const https = require('https');
-const BASE_URL = 'https://www.youtube.com/results?';
 const fs = require('fs');
-const MEGABYTES_32 = 1 << 25;
+
+/* global variables */
 var prev;
 
 /**
@@ -43,7 +48,7 @@ var prev;
  * @param {Map<String, Object>} queue a global map that maps servers to its queues.
  */
 async function play(message, serverQueue, queue) {
-    const song = message.content.substring(6); //takes the string of message from excluding '^play '
+    const song = message.content.substring(SONG_START_INDEX); //takes the string of message from excluding '^play '
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
         message.channel.send("Kaede cannot play music if you are not in a voice channel!");
@@ -80,7 +85,7 @@ async function play(message, serverQueue, queue) {
     } 
     message.channel.send(songInfoEmbed);
     try {
-        let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: 30000, errors : ['time']});
+        let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: ONE_MIN / 2, errors : ['time']});
         var index = Number(collected.first().content);
     } catch (error){
         message.channel.send("Kaede waited too long for this!");
@@ -89,15 +94,13 @@ async function play(message, serverQueue, queue) {
     const songData = {
         title : songInfo[index - 1].title,
         url : songInfo[index - 1].link,
-        description : songInfo[index - 1].description,
     };
     if (typeof serverQueue === "undefined") {
         const queueFields = { // queuefields is the same as serverQueue.
-            textChannel : message.channel,
             voiceChannel : voiceChannel,
             connection : null,
             songs : [],
-            volume : 5,
+            volume : SERVERQUEUE_OPTIMAL_VOLUME,
             playing : true,
             looping: false,
             repeating: false,
@@ -145,10 +148,11 @@ async function dispatchSong(message, song, queue) {
     if (!song) {
         const filter = m => {
             let theMessage = m.content.toLowerCase();
-            return theMessage.startsWith("^play ");
+            return (theMessage.startsWith("^play ") || theMessage.startsWith("^previous") || theMessage.startsWith("^p ") || theMessage.startsWith("^prev") 
+            || theMessage.startsWith("^playlist shuffle "));
         }
         try {
-            await message.channel.awaitMessages(filter, {max: 1, time : 120000, errors : ['time']}); // Kaede waits 2 minutes for new songs to be played before leaving the voice channel
+            await message.channel.awaitMessages(filter, {max: 1, time : ONE_MIN * 2, errors : ['time']}); // Kaede waits 2 minutes for new songs to be played before leaving the voice channel
             // will trigger play from Kaede.js, we check every second until added to queue
             var checkIfPlayDone = setInterval(() => {
                 if (serverQueue.songs && serverQueue.songs[0]) {
@@ -183,7 +187,7 @@ async function dispatchSong(message, song, queue) {
             message.channel.send("Unexpected error occured!! Kaede's scared...");
             //console.error(error);
         });
-        dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+        dispatcher.setVolumeLogarithmic(serverQueue.volume / SERVERQUEUE_OPTIMAL_VOLUME);
     }
 }
 /**
@@ -479,8 +483,9 @@ function swap(message, serverQueue, index1, index2) {
  * added into the queue.
  * @param {Object} message message object sent to add the previous song
  * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ * @param {Map<String, Object>} queue a global map that maps servers to its own music queues
  */
-function previous(message, serverQueue) {
+function previous(message, serverQueue, queue) {
     if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot skip all the songs unless you're in a voice channel !");
         return;
@@ -493,7 +498,13 @@ function previous(message, serverQueue) {
         message.channel.send("There is no previous song!");
         return;
     }
-    serverQueue.songs.push(prev);
+    if (serverQueue.songs.length === 0) {
+        serverQueue.songs.push(prev);
+        dispatchSong(message, prev, queue);
+    }
+    else {
+        serverQueue.songs.push(prev);
+    }
     message.channel.send("Kaede has added " + prev.title + " back into the queue!");
 }
 
@@ -504,7 +515,11 @@ function previous(message, serverQueue) {
  * @param {Object} message message object sent to create the playlist.
  * @param {String} name the name of the playlist to be created.
  */
-async function createPlaylist(message, name) {
+function createPlaylist(message, name) {
+    if (!name) {
+        message.channel.send("Kaede does not know what name the playlist should be created with!");
+        return;
+    }
     fs.readFile('Playlists.json', 'utf8', async (error, data) => {
         if (error){
             console.log(error);
@@ -524,7 +539,7 @@ async function createPlaylist(message, name) {
                 message.channel.send("Kaede has already created a playlist with this name!");
                 return;
             }
-            playlists[message.guild.id][message.author.id][name] = []; //4D array with server, author, name of playlist and songs as its dimensions
+            playlists[message.guild.id][message.author.id][name] = []; //"4D JS object array" with server, author, name of playlist and songs as its dimensions
             json_format_string = JSON.stringify(playlists);
             fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
                 if (error) {
@@ -543,6 +558,14 @@ async function createPlaylist(message, name) {
  * @param {String} songName the name of song to be added.
  */
 async function addToPlaylist(message, playlistName, songName) {
+    if (!playlistName) {
+        message.channel.send("Kaede does not know what the name of the playlist is!");
+        return;
+    }
+    if (!songName) {
+        message.channel.send("Kaede does not know what the name of the song is!");
+        return;
+    }
     fs.readFile('Playlists.json', 'utf8', async (error, data) => {
         if (error){
             console.log(error);
@@ -561,6 +584,10 @@ async function addToPlaylist(message, playlistName, songName) {
                 message.channel.send("Kaede cannot find any playlists created by " + message.author.username + " with the name " + playlistName + "!");
                 return;
             }
+            if (playlists[message.guild.id][message.author.id][playlistName].length === MAX_PLAYLIST_SONGS) {
+                message.channel.send("Kaede cannot have more than 30 songs in a single playlist! The playlist is full!");
+                return;
+            }
             let songInfo;
             try {
                 songInfo = await getYoutubeInfo(songName);
@@ -568,7 +595,7 @@ async function addToPlaylist(message, playlistName, songName) {
                 message.channel.send("Kaede cannot find any songs with that title!");
                 return;
             }
-            const songInfoEmbed = new Discord.RichEmbed().setColor(
+            const songInfoEmbed = new Discord.MessageEmbed().setColor(
             '#F8C300').setTitle('Top 5 songs to be added to playlist').setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage( //create a RichEmbed to display top 5 songs.
             'https://manga.tokyo/wp-content/uploads/2019/12/5dea5f4fecea9.jpg')
             .setDescription('Kaede does not know what you want to put in! So you choose...').addField(
@@ -585,7 +612,7 @@ async function addToPlaylist(message, playlistName, songName) {
             }
             message.channel.send(songInfoEmbed);
             try {
-                let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: 30000, errors : ['time']});
+                let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: ONE_MIN / 2, errors : ['time']});
                 var index = Number(collected.first().content);
             } catch (error){
                 message.channel.send("Kaede waited too long for this!");
@@ -603,6 +630,94 @@ async function addToPlaylist(message, playlistName, songName) {
                 }
             });
             message.channel.send("Kaede has added a song of name " + songData.title + " to the playlist " + playlistName + "!");
+        }
+    });
+}
+
+/**
+ * Function implementation for shuffling the songs in the playlist. Works like a "batch" play where songs are added in random order from the playlist.
+ * @param {Object} message message sent to shuffle the playlist.
+ * @param {String} playlistName the name of the playlist to shuffle.
+ * @param {Object} serverQueue an object used to store all the properties, including an array containing the list of songs to be played.
+ * @param {Map<String, Object>} queue a global map that maps server unique ID to its serverQueue object.
+ */
+async function shufflePlaylist(message, playlistName, serverQueue, queue) {
+    if (!message.member.voice.channel) {
+        message.channel.send("Kaede cannot shuffle the playlist if you're not in a voice channel!");
+        return;
+    }
+    fs.readFile('Playlists.json', 'utf8', async (error, data) => {
+        if (error){
+            console.log(error);
+        } 
+        else {
+            playlists = JSON.parse(data);
+            if (!playlists[message.guild.id]) {
+                message.channel.send("Kaede cannot find any playlists in this server!");
+                return;
+            }
+            if (!playlists[message.guild.id][message.author.id]) {
+                message.channel.send("Kaede cannot find any playlists created by " + message.author.username + "!");
+                return;
+            }
+            if (!playlists[message.guild.id][message.author.id][playlistName]) {
+                message.channel.send("Kaede cannot find any playlists created by " + message.author.username + " with the name " + playlistName + "!");
+                return;
+            }
+            if (playlists[message.guild.id][message.author.id][playlistName].length === 0) {
+                message.channel.send("Kaede cannot shuffle a playlist that is empty!");
+                return;
+            }
+            playlistLength = playlists[message.guild.id][message.author.id][playlistName].length;
+            var arrRandIndex = [];
+            while (arrRandIndex.length < playlistLength) {
+                let rand = Math.floor(Math.random() * playlistLength);
+                if (!arrRandIndex.includes(rand)) {
+                    arrRandIndex.push(rand);
+                }
+            }
+            if (typeof serverQueue === "undefined") {
+                const queueFields = { // queuefields is the same as serverQueue.
+                    voiceChannel : message.member.voice.channel,
+                    connection : null,
+                    songs : [],
+                    volume : SERVERQUEUE_OPTIMAL_VOLUME,
+                    playing : true,
+                    looping: false,
+                    repeating: false,
+                };
+                queue.set(message.guild.id, queueFields);
+                for (i = 0; i < arrRandIndex.length; ++i) {
+                    queueFields.songs.push(playlists[message.guild.id][message.author.id][playlistName][arrRandIndex[i]]);
+                }
+                //console.log(queueFields.songs);
+                message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
+                try {
+                    var connection = await queueFields.voiceChannel.join();
+                    queueFields.connection = connection;
+                    dispatchSong(message, queueFields.songs[0], queue); 
+                } catch (error) {
+                    queue.delete(message.guild.id);
+                    message.channel.send("Kaede found an error in playing the music!");
+                    return;
+                }
+            }
+            else {
+                for (i = 0; i < arrRandIndex.length; ++i) {
+                    serverQueue.songs.push(playlists[message.guild.id][message.author.id][playlistName][arrRandIndex[i]]);
+                }
+                message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
+                if (!serverQueue.connection) {
+                    try {
+                        var connection = await voiceChannel.join(); //wait for Kaede to join voice channel
+                        serverQueue.connection = connection;
+                    } catch (error) {
+                        queue.delete(message.guild.id);
+                        message.channel.send("Kaede found an error in playing the music!");
+                        return;
+                    }
+                }
+            }
         }
     });
 }

@@ -6,10 +6,10 @@ module.exports = {
     rps, guessNumber, mostMath, blackJack
 }
 
-/**
- * Global Variables and Module imports defined.
- */
+/* Constants defined. */
+const HALF_MIN = 30000;
 
+/* Module imports. */
 const MiscFunctions = require('./MiscFunctions.js');
 const fs = require('fs');
 
@@ -86,7 +86,7 @@ async function rps(message) {
     let draw = true;
     while (draw) {
         try {
-            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 10000, errors: ['time']});
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 3, errors: ['time']});
             let kaedechoice = Math.ceil(Math.random() * 3);
             if (kaedechoice === 1) {
                 message.channel.send("rock!");
@@ -98,7 +98,7 @@ async function rps(message) {
                 message.channel.send("scissors!");
             }
             let win = 3;
-            await MiscFunctions.sleep(800);
+            await MiscFunctions.sleep(HALF_MIN / 30);
             switch (collected.first().content.toLowerCase()) {
                 case "rock":
                     win = kaedechoice - rpsenum.ROCK;
@@ -147,7 +147,7 @@ async function guessNumber(message) {
     let correctNumber = Math.floor(Math.random() * 10 + 1); // create a random between 1-10
     while (guessesLeft > 0) {
         try {
-            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 10000, errors: ['time']});
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 3, errors: ['time']});
             let numberGuess = Number(collected.first().content);
             if (Number.isInteger(numberGuess) && numberGuess >= 1 && numberGuess <= 10) {
                 --guessesLeft;
@@ -195,7 +195,7 @@ async function mostMath(message) {
     var countCorrect = 0;
     var countTotal = 0;
     let answered = true;
-    while (Date.now() - start <= 30000) {
+    while (Date.now() - start <= HALF_MIN) {
         let actualAns;
         if (answered) {
             let op = "";
@@ -225,7 +225,7 @@ async function mostMath(message) {
         }
         answered = false;
         try {
-            let collected = await message.channel.awaitMessages(filter, {max: 1, time : 30000 + start - Date.now(), errors: ['time']}); 
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN + start - Date.now(), errors: ['time']}); 
             let answer = Number(collected.first().content);
             if (answer === actualAns) {
                 countCorrect++;
