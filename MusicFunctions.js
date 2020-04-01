@@ -622,6 +622,12 @@ async function addToPlaylist(message, playlistName, songName) {
                 title : songInfo[index - 1].title,
                 url : songInfo[index - 1].link, // please note that in playlist we dont create a property of description since JSON file has a limited memory space.
             };
+            for (i = 0; i < playlists[message.guild.id][message.author.id][playlistName].length; ++i) {
+                if (playlists[message.guild.id][message.author.id][playlistName][i].url === songData.url) {
+                    message.channel.send("Kaede already has this song in the playlist " + playlistName + "!");
+                    return;
+                }
+            }
             playlists[message.guild.id][message.author.id][playlistName].push(songData);
             json_format_string = JSON.stringify(playlists);
             fs.writeFile('Playlists.json', json_format_string, 'utf8', (error) => {
