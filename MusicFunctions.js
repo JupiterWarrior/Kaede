@@ -18,7 +18,7 @@ NOTE: playlists can only be modified by the author who created it and playlists 
 
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
 queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist, shufflePlaylist,
-showPlaylists}
+showPlaylists, showPlaylistSong}
 
 /* Constant definitions */
 const MEGABYTES_32 = 1 << 25;

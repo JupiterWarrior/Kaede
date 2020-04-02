@@ -159,6 +159,9 @@ bot.on('message', async message => {
                     case "names":
                         MusicFunctions.showPlaylists(message);
                         break;
+                    case "songs":
+                        MusicFunctions.showPlaylistSong(message, arr[2]);
+                        break;
                     default:
                         message.channel.send("This command is not in Kaede's playlist commands!!");
                         break;
