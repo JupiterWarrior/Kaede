@@ -188,9 +188,9 @@ async function mostMath(message) {
     } // enumeration for operations
     const filter = m => {
         let num = Number(m.content);
-        return m.author.id === message.author.id && !isNaN(num);
+        return m.author.id === message.author.id && (m.content === "&cancel" || !isNaN(num));
     }
-    message.channel.send("Kaede wants you to answer as many math questions as possible in 30 seconds!! <:6185_No_game_no_life_1:683263289895157782>");
+    message.channel.send("Kaede wants you to answer as many math questions as possible in 30 seconds!! <:6185_No_game_no_life_1:683263289895157782>\nYou can cancel the game by typing &cancel!");
     const start = Date.now();
     var countCorrect = 0;
     var countTotal = 0;
@@ -208,11 +208,16 @@ async function mostMath(message) {
         answered = false;
         try {
             let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN + start - Date.now(), errors: ['time']}); 
+            if (collected.first().content === "&cancel") {
+                message.channel.send("Kaede cancel!");
+                return;
+            }
             let answer = Number(collected.first().content);
             countCorrect = answer === actualAns ? countCorrect + 1 : countCorrect;
             ++countTotal;
             answered = true;
         } catch (error) {
+            message.channel.send("Time's up!");
             break;
         }
     }

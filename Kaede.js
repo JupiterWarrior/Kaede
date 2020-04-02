@@ -10,7 +10,6 @@
 /* Module Imports. */
 const GameFunctions = require('./GameFunctions.js'); 
 const MusicFunctions = require('./MusicFunctions.js');
-const MiscFunctions = require('./MiscFunctions.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
 const fs = require('fs');
@@ -47,7 +46,12 @@ bot.on('message', async message => {
         const serverQueue = queue.get(message.guild.id); // get the value associated with the server key
         switch (firstcmd) {
             case "help":
-                message.channel.send("in progress"); // A RichEmbed structure that displays all the commands of kaede
+                if (arr.length === 1) {
+
+                }
+                switch (arr[1]) {
+
+                }
                 break;
             case "test":
                 message.channel.send("hellooo <3"); // used for debugging, and etc ( temporary CMD )
