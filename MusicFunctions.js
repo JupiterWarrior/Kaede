@@ -731,6 +731,10 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
     });
 }
 
+/**
+ * Function implementation to show all the playlists created by a particular user
+ * @param {Object} message message sent to show all the playlists created by a particular user 
+ */
 async function showPlaylists(message) {
     fs.readFile('playlists.json', 'utf-8', (error, data) => {
         if (error) {
@@ -756,8 +760,13 @@ async function showPlaylists(message) {
     });
 }
 
+/**
+ * function implementation for showing all the songs in a particular playlist by a single user
+ * @param {Object} message message sent to show the songs in a particular playlist
+ * @param {String} playlistName the name of the particular playlist of interest
+ */
 async function showPlaylistSong(message, playlistName) {
-    fs.readFile('playlists.json', 'uft-8', (error, data) => {
+    fs.readFile('playlists.json', 'utf-8', (error, data) => {
         if (error) {
             console.log(error);
             return;
@@ -765,7 +774,7 @@ async function showPlaylistSong(message, playlistName) {
             let playlists = JSON.parse(data);
             
             const songInfoEmbed = new Discord.MessageEmbed().setColor(
-                '#F8C300').setTitle('Playlists of ' + message.author.username).setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
+                '#F8C300').setTitle('Playlist ' + playlistName + ' by ' + message.author.username).setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
                 'https://manga.tokyo/wp-content/uploads/2019/12/5dea5f4fecea9.jpg').setFooter(
                 'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
             // RichEmbed object created to display the author's playlists
@@ -776,10 +785,8 @@ async function showPlaylistSong(message, playlistName) {
                 songInfoEmbed.setDescription('Kaede cannot find any playlists you made with the name' + playlistName);
             }
             else {
-                let i = 1;
-                for (let songs in playlists[message.author.id][playlistName]) {
-                    songInfoEmbed.addField(i, songs.title, false);
-                    ++i;
+                for (i = 0; i < playlists[message.author.id][playlistName].length; i++) {
+                    songInfoEmbed.addField('Song number ' + (i+1), playlists[message.author.id][playlistName][i].title, false);
                 }
             }
             message.channel.send(songInfoEmbed);
