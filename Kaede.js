@@ -10,6 +10,7 @@
 /* Module Imports. */
 const GameFunctions = require('./GameFunctions.js'); 
 const MusicFunctions = require('./MusicFunctions.js');
+const EmbedFunctions = require('./DisplayEmbed.js');
 const Discord = require('discord.js');
 const {prefix, token} = require('./auth.json');
 const fs = require('fs');
@@ -46,11 +47,15 @@ bot.on('message', async message => {
         const serverQueue = queue.get(message.guild.id); // get the value associated with the server key
         switch (firstcmd) {
             case "help":
-                if (arr.length === 1) {
-
+                if (message.content.length <= 5) {
+                    EmbedFunctions.helpMenu(message);
                 }
-                switch (arr[1]) {
-
+                else {
+                    switch (arr[1]) {
+                        default:
+                            message.channel.send("in progress");
+                            break;
+                    }
                 }
                 break;
             case "test":
@@ -161,6 +166,10 @@ bot.on('message', async message => {
                         break;
                     case "songs":
                         MusicFunctions.showPlaylistSong(message, arr[2]);
+                        break;
+                    case "delete":
+                        break;
+                    case "rename":
                         break;
                     default:
                         message.channel.send("This command is not in Kaede's playlist commands!!");
