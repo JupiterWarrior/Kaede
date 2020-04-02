@@ -36,6 +36,7 @@ const querystring = require('querystring');
 const entities = require('html-entities').AllHtmlEntities;
 const https = require('https');
 const fs = require('fs');
+const MiscFunctions = require('./MiscFunctions.js');
 
 /* global variables */
 var prev;
@@ -675,7 +676,7 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
             playlistLength = playlists[message.author.id][playlistName].length;
             var arrRandIndex = [];
             while (arrRandIndex.length < playlistLength) {
-                let rand = Math.floor(Math.random() * playlistLength);
+                let rand = MiscFunctions.randInt(0, playlistLength - 1);
                 if (!arrRandIndex.includes(rand)) {
                     arrRandIndex.push(rand);
                 }
