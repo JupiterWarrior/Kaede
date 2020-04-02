@@ -196,30 +196,12 @@ async function mostMath(message) {
     var countTotal = 0;
     let answered = true;
     while (Date.now() - start <= HALF_MIN) {
-        let actualAns;
         if (answered) {
-            let op = "";
             let num = MiscFunctions.randInt(1, 3);
-            if (num === 1) {
-                op = "+";
-            }
-            else if (num === 2) {
-                op = "-";
-            }
-            else {
-                op = "*";
-            }
+            let op = num === 1 ? "+" : (num === 2 ? "-" : "*");
             let num1 = MiscFunctions.randInt(-9, 9);
             let num2 = MiscFunctions.randInt(-9, 9);
-            if (op === openum.ADD) {
-                actualAns = num1 + num2;
-            }
-            else if (op === openum.SUB) {
-                actualAns = num1 - num2;
-            }
-            else {
-                actualAns = num1 * num2;
-            }
+            var actualAns = op === openum.ADD ? num1 + num2 : (op === openum.SUB ? num1 - num2 : num1 * num2);
             let num2str = num2 >= 0 ? num2.toString() : "(" + num2.toString() + ")";
             await message.channel.send(num1 + " " + op + " " + num2str + "?");
         }
@@ -227,9 +209,7 @@ async function mostMath(message) {
         try {
             let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN + start - Date.now(), errors: ['time']}); 
             let answer = Number(collected.first().content);
-            if (answer === actualAns) {
-                countCorrect++;
-            }
+            countCorrect = answer === actualAns ? countCorrect + 1 : countCorrect;
             ++countTotal;
             answered = true;
         } catch (error) {
