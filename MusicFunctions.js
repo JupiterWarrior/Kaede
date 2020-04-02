@@ -752,6 +752,38 @@ async function showPlaylists(message) {
     });
 }
 
+async function showPlaylistSong(message, playlistName) {
+    fs.readFile('playlists.json', 'uft-8', (error, data) => {
+        if (error) {
+            console.log(error);
+            return;
+        } else {
+            let playlists = JSON.parse(data);
+            
+            const songInfoEmbed = new Discord.MessageEmbed().setColor(
+                '#F8C300').setTitle('Playlists of ' + message.author.username).setAuthor('Kaede', message.client.user.avatarURL /* if have kaede website link put here*/).setImage(
+                'https://manga.tokyo/wp-content/uploads/2019/12/5dea5f4fecea9.jpg').setFooter(
+                'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
+            // RichEmbed object created to display the author's playlists
+            if (!playlists[message.author.id]) {
+                songInfoEmbed.setDescription('Kaede cannot find any playlists you made');
+            }
+            else if (!playlists[message.author.id][playlistName]) {
+                songInfoEmbed.setDescription('Kaede cannot find any playlists you made with the name' + playlistName);
+            }
+            else {
+                let i = 1;
+                for (let songs in playlists[message.author.id][playlistName]) {
+                    songInfoEmbed.addField(i, songs.title, false);
+                    ++i;
+                }
+            }
+            message.channel.send(songInfoEmbed);
+
+        }
+    });
+}
+
 /**
  * Helper Functions to help getting the youtube top 5 URL for the play function (most are referrenced from other codes)
  */
