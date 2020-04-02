@@ -82,7 +82,7 @@ async function play(message, serverQueue, queue) {
     const chooseFilter = m => {
         let choice = Number(m.content);
         let cond =  m.author.id === message.author.id && !isNaN(choice);
-        return m.content == "&cancel" || (cond && choice >= 1 && choice <= 5 && Number.isInteger(choice));
+        return m.content === "&cancel" || (cond && choice >= 1 && choice <= 5 && Number.isInteger(choice));
     } 
     message.channel.send(songInfoEmbed);
     try {
@@ -607,15 +607,19 @@ async function addToPlaylist(message, arr) {
             'Song number 3', songInfo[2].title, false).addField(
             'Song number 4', songInfo[3].title, false).addField(
             'Song number 5', songInfo[4].title, false).setFooter(
-            'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
+            'Tip: You can cancel selection by typing &cancel! Kaede can do more cool stuff than this too! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
             const chooseFilter = m => {
                 let choice = Number(m.content);
                 let cond =  m.author.id === message.author.id && !isNaN(choice);
-                return cond && choice >= 1 && choice <= 5 && Number.isInteger(choice);
+                return (m.content === "&cancel") || (cond && choice >= 1 && choice <= 5 && Number.isInteger(choice));
             }
             message.channel.send(songInfoEmbed);
             try {
                 let collected = await message.channel.awaitMessages(chooseFilter, {max: 1, time: ONE_MIN / 2, errors : ['time']});
+                if (collected.first().content === "&cancel") {
+                    message.channel.send("Kaede cancel!");
+                    return;
+                }
                 var index = Number(collected.first().content);
             } catch (error){
                 message.channel.send("Kaede waited too long for this!");
