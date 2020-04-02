@@ -1,2 +1,4 @@
 # Kaede
-Bot in discord that can do music, anime, games, translation, accessing the internet, birthday and important dates ( calendar ) and 2D girl animation
+Bot in discord that can do things like music, anime, watching videos, games, translation, calculations through typing commands in discord AND by voice recognition ( some features ).
+
+Kaede will have her own website soon.
