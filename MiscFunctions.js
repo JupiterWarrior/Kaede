@@ -21,5 +21,5 @@ function sleep(milliseconds) {
 function randInt(start, end) {
     start = Math.ceil(start);
     end = Math.floor(end);
-    return Math.floor(start + Math.random() * end);
+    return Math.floor(start + Math.random() * (end - start + 1));
 }
