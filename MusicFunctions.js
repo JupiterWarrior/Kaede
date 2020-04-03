@@ -15,7 +15,7 @@ NOTE: playlists can only be modified by the author who created it and playlists 
 
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
 queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist, shufflePlaylist,
-showPlaylists, showPlaylistSong}
+showPlaylists, showPlaylistSong, deletePlaylist}
 
 /* Constant definitions */
 const MEGABYTES_32 = 1 << 25;
@@ -732,7 +732,7 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
  * Function implementation to show all the playlists created by a particular user
  * @param {Object} message message sent to show all the playlists created by a particular user 
  */
-async function showPlaylists(message) {
+function showPlaylists(message) {
     fs.readFile('playlists.json', 'utf-8', (error, data) => {
         if (error) {
             console.log(error);
@@ -762,7 +762,7 @@ async function showPlaylists(message) {
  * @param {Object} message message sent to show the songs in a particular playlist
  * @param {String} playlistName the name of the particular playlist of interest
  */
-async function showPlaylistSong(message, playlistName) {
+function showPlaylistSong(message, playlistName) {
     fs.readFile('playlists.json', 'utf-8', (error, data) => {
         if (error) {
             console.log(error);
@@ -776,10 +776,10 @@ async function showPlaylistSong(message, playlistName) {
                 'Tip: Kaede can do more cool stuff than this! Check out ^help!', 'https://www.googlecover.com/_asset/_cover/Anime-Girl-Winking_780.jpg');
             // RichEmbed object created to display the author's playlists
             if (!playlists[message.author.id]) {
-                songInfoEmbed.setDescription('Kaede cannot find any playlists you made');
+                songInfoEmbed.setDescription('Kaede cannot find any playlists you made!');
             }
             else if (!playlists[message.author.id][playlistName]) {
-                songInfoEmbed.setDescription('Kaede cannot find any playlists you made with the name' + playlistName);
+                songInfoEmbed.setDescription('Kaede cannot find any playlists you made with the name ' + playlistName + '!');
             }
             else {
                 for (i = 0; i < playlists[message.author.id][playlistName].length; i++) {
@@ -792,6 +792,50 @@ async function showPlaylistSong(message, playlistName) {
     });
 }
 
+async function deletePlaylist(message, playlistIndex) {
+    fs.readFile('playlists.json', 'utf-8', async (error, data) => {
+        if (error) {
+            console.log(error);
+            return;
+        } else {
+            let playlists = JSON.parse(data);
+            if (!playlists[message.author.id]) {
+                message.channel.send('Kaede cannot find any playlists you made!');
+                return;
+            }
+            let arrKeys = Object.keys(playlists[message.author.id]);
+            if (playlistIndex <= 0 || playlistIndex > arrKeys.length || isNaN(playlistIndex)) {
+                message.channel.send('Kaede cannot find any playlists you made with the name ' + playlistName + ' !');
+                return;
+            }
+            message.channel.send("Kaede is going to delete the playlist " + arrKeys[playlistIndex - 1] + "! Are you sure? (y/n)");
+            const filter = (m) => {
+                let msg = m.content.toLowerCase();
+                return (msg === "y" || msg === "n" || msg === "yes" || msg === "no") && (m.author.id === message.author.id);
+            }
+            try {
+                let collected = await message.channel.awaitMessages(filter, {max: 1, time : ONE_MIN / 4, errors: ['time']});
+                if (collected.first().content === "n" || collected.first().content === "no") {
+                    message.channel.send("Kaede will cancel deleting the playlist! Make up your mind better next time!");
+                    return;
+                }
+                else {
+                    delete playlists[message.author.id][arrKeys[playlistIndex - 1]];
+                    let json_format_string = JSON.stringify(playlists);
+                    fs.writeFile('playlists.json', json_format_string, 'utf8', (error) => {
+                        if (error) {
+                            console.log(error);
+                        }
+                    });
+                    message.channel.send("Kaede has deleted " + arrKeys[playlistIndex -1] + " as requested by " + message.author.username + "!");
+                }
+            } catch (error) {
+                message.channel.send("Kaede waited too long for this!");
+                return;
+            }
+        }
+    });
+}
 /**
  * Helper Functions to help getting the youtube top 5 URL for the play function (most are referrenced from other codes)
  */

@@ -168,6 +168,7 @@ bot.on('message', async message => {
                         MusicFunctions.showPlaylistSong(message, arr[2]);
                         break;
                     case "delete":
+                        MusicFunctions.deletePlaylist(message, Number(arr[2]));
                         break;
                     case "rename":
                         break;
