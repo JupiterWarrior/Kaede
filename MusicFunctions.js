@@ -1,12 +1,7 @@
 /*To do music commands:
-remove (from playlist)
-delete (delete playlist completely) 
-rename ( rename the playlist )
-// Additional stuff
-TBD: add a next page icon for selection of songs ( make it top 15 or top 20)
-TBD: add a password and higher security level for validations of deleting playlist or renaming playlist when doing playlists function
-Idea: ASK for password through personal messaging by bot when deleting a certain playlist.
-NOTE: playlists can only be modified by the author who created it and playlists can contain no more than 30 songs. teste
+remove (from playlist) @LINE 656 OF THIS FILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+NOTE: playlists can only be modified by the author who created it. 
+Each user can have no more than 10 playlists and no more than 30 songs in each playlist.
 */
 
 /**
@@ -15,15 +10,16 @@ NOTE: playlists can only be modified by the author who created it and playlists 
 
 module.exports = {play, skip, skipAll, pause, resume, loop, nowPlaying, 
 queue, repeat, remove, first, swap, previous, createPlaylist, addToPlaylist, shufflePlaylist,
-showPlaylists, showPlaylistSong, deletePlaylist}
+showPlaylists, showPlaylistSong, deletePlaylist, renamePlaylist, removeSongFromPlaylist}
 
 /* Constant definitions */
 const MEGABYTES_32 = 1 << 25;
 const BASE_URL = 'https://www.youtube.com/results?';
 const SONG_START_INDEX = 6;
-const SERVERQUEUE_OPTIMAL_VOLUME = 5;
+const SERVERQUEUE_LOG_VOLUME = 1;
 const ONE_MIN = 60000;
 const MAX_PLAYLIST_SONGS = 30;
+const MAX_PLAYLISTS = 10;
 
 /* Module imports */
 const Discord = require('discord.js');
@@ -47,6 +43,9 @@ var prev;
  */
 async function play(message, serverQueue, queue) {
     const song = message.content.substring(SONG_START_INDEX); //takes the string of message from excluding '^play '
+    if (!song) {
+        return message.channel.send("Kaede does not know what song is to be played!");
+    }
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
         message.channel.send("Kaede cannot play music if you are not in a voice channel!");
@@ -103,7 +102,6 @@ async function play(message, serverQueue, queue) {
             voiceChannel : voiceChannel,
             connection : null,
             songs : [],
-            volume : SERVERQUEUE_OPTIMAL_VOLUME,
             playing : true,
             looping: false,
             repeating: false,
@@ -190,7 +188,7 @@ async function dispatchSong(message, song, queue) {
             message.channel.send("Unexpected error occured!! Kaede's scared...");
             //console.error(error);
         });
-        dispatcher.setVolumeLogarithmic(serverQueue.volume / SERVERQUEUE_OPTIMAL_VOLUME);
+        dispatcher.setVolumeLogarithmic(SERVERQUEUE_LOG_VOLUME);
     }
 }
 /**
@@ -532,6 +530,11 @@ function createPlaylist(message, name) {
             if (!playlists[message.author.id]) {
                 playlists[message.author.id] = {};
             }
+            let arrPlaylists = Object.keys(playlists[message.author.id]);
+            if (arrPlaylists.length === MAX_PLAYLISTS) {
+                message.channel.send("Kaede cannot have more than 10 playlists for a single user!");
+                return;
+            }
             if (!playlists[message.author.id][name]) {
                 playlists[message.author.id][name] = [];  //"3D JS object array" with author, name of playlist and songs as its dimensions
             }
@@ -644,6 +647,15 @@ async function addToPlaylist(message, arr) {
     });
 }
 
+/** 
+ * Removes a song from a particular playlist.
+ * @param {Object} message message sent to remove the song.
+ * @param {String} playlistName the name of the playlist.
+ * @param {Number} songIndex index of the song to be removed.
+ */
+function removeSongFromPlaylist(message, playlistName, songIndex) {
+ //TODO
+}
 /**
  * Function implementation for shuffling the songs in the playlist. Works like a "batch" play where songs are added in random order from the playlist.
  * @param {Object} message message sent to shuffle the playlist.
@@ -652,6 +664,9 @@ async function addToPlaylist(message, arr) {
  * @param {Map<String, Object>} queue a global map that maps server unique ID to its serverQueue object.
  */
 async function shufflePlaylist(message, playlistName, serverQueue, queue) {
+    if (!playlistName) {
+        return message.channel.send("Kaede does not know what playlist to shuffle!");
+    }
     if (!message.member.voice.channel) {
         message.channel.send("Kaede cannot shuffle the playlist if you're not in a voice channel!");
         return;
@@ -676,7 +691,7 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
             }
             let playlist = playlists[message.author.id][playlistName];
             let temp;
-            for (let i = playlist.length - 1; i > 0; i--) {
+            for (let i = playlist.length - 1; i > 0; i--) { // Fisher-yates algorithm
                 const j = Math.floor(Math.random() * (i + 1));
                 temp = playlist[i];
                 playlist[i] = playlist[j];
@@ -687,7 +702,6 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
                     voiceChannel : message.member.voice.channel,
                     connection : null,
                     songs : [],
-                    volume : SERVERQUEUE_OPTIMAL_VOLUME,
                     playing : true,
                     looping: false,
                     repeating: false,
@@ -713,8 +727,8 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
 }
 
 /**
- * Function implementation to show all the playlists created by a particular user
- * @param {Object} message message sent to show all the playlists created by a particular user 
+ * Function implementation to show all the playlists created by a particular user.
+ * @param {Object} message message sent to show all the playlists created by a particular user .
  */
 function showPlaylists(message) {
     fs.readFile('playlists.json', 'utf-8', (error, data) => {
@@ -742,11 +756,14 @@ function showPlaylists(message) {
 }
 
 /**
- * function implementation for showing all the songs in a particular playlist by a single user
- * @param {Object} message message sent to show the songs in a particular playlist
- * @param {String} playlistName the name of the particular playlist of interest
+ * Function implementation for showing all the songs in a particular playlist by a single user.
+ * @param {Object} message message sent to show the songs in a particular playlist.
+ * @param {String} playlistName the name of the particular playlist of interest.
  */
 function showPlaylistSong(message, playlistName) {
+    if (!playlistName) {
+        return message.channel.send("Kaede does not know the name of the playlist to be shown!");
+    }
     fs.readFile('playlists.json', 'utf-8', (error, data) => {
         if (error) {
             console.log(error);
@@ -776,7 +793,15 @@ function showPlaylistSong(message, playlistName) {
     });
 }
 
-async function deletePlaylist(message, playlistIndex) {
+/**
+ * Deletes a playlist belonging to the user.
+ * @param {Object} message Message object sent to delete the playlist
+ * @param {Number} playlistIndex the index of the playlist.
+ */
+async function deletePlaylist(message, playlistName) {
+    if (!playlistName) {
+        return message.channel.send("Kaede does not know what the name of the playlist is!")
+    }
     fs.readFile('playlists.json', 'utf-8', async (error, data) => {
         if (error) {
             console.log(error);
@@ -787,36 +812,75 @@ async function deletePlaylist(message, playlistIndex) {
                 message.channel.send('Kaede cannot find any playlists you made!');
                 return;
             }
-            let arrKeys = Object.keys(playlists[message.author.id]);
-            if (playlistIndex <= 0 || playlistIndex > arrKeys.length || isNaN(playlistIndex)) {
-                message.channel.send('Kaede cannot find any playlists you made with the name ' + playlistName + ' !');
+            if (!playlists[message.author.id][playlistName]) {
+                message.channel.send('Kaede cannot find any playlists you made with the name ' + playlistName + '!');
                 return;
             }
-            message.channel.send("Kaede is going to delete the playlist " + arrKeys[playlistIndex - 1] + "! Are you sure? (y/n)");
+            message.channel.send("Kaede is going to delete the playlist " + playlistName + "! Are you sure? (y/n)");
             const filter = (m) => {
                 let msg = m.content.toLowerCase();
                 return (msg === "y" || msg === "n" || msg === "yes" || msg === "no") && (m.author.id === message.author.id);
             }
             try {
-                let collected = await message.channel.awaitMessages(filter, {max: 1, time : ONE_MIN / 4, errors: ['time']});
+                let collected = await message.channel.awaitMessages(filter, {max: 1, time : ONE_MIN / 3, errors: ['time']});
                 if (collected.first().content === "n" || collected.first().content === "no") {
                     message.channel.send("Kaede will cancel deleting the playlist! Make up your mind better next time!");
                     return;
                 }
                 else {
-                    delete playlists[message.author.id][arrKeys[playlistIndex - 1]];
+                    delete playlists[message.author.id][playlistName];
                     let json_format_string = JSON.stringify(playlists);
                     fs.writeFile('playlists.json', json_format_string, 'utf8', (error) => {
                         if (error) {
                             console.log(error);
                         }
                     });
-                    message.channel.send("Kaede has deleted " + arrKeys[playlistIndex -1] + " as requested by " + message.author.username + "!");
+                    message.channel.send("Kaede has deleted " + playlistName + " as requested by " + message.author.username + "!");
                 }
             } catch (error) {
                 message.channel.send("Kaede waited too long for this!");
                 return;
             }
+        }
+    });
+}
+
+/**
+ * Renames a particular playlist.
+ * @param {Object} message message sent to rename the playlist.
+ * @param {String} playlistOriginalName the name of the playlist to be renamed.
+ * @param {String} playlistNewName the new name of the playlist.
+ */
+function renamePlaylist(message, playlistOriginalName, playlistNewName) {
+    if (!playlistOriginalName) {
+        return message.channel.send("Kaede does not know what the original name of the playlist is!");
+    }
+    if (!playlistNewName) {
+        return message.channel.send("Kaede does not know what the new name of the playlist is!");
+    }
+    fs.readFile('playlists.json', 'utf-8', async (error, data) => {
+        if (error) {
+            console.log(error);
+            return;
+        } else {
+            let playlists = JSON.parse(data);
+            if (!playlists[message.author.id]) {
+                message.channel.send('Kaede cannot find any playlists you made!');
+                return;
+            }
+            else if (!playlists[message.author.id][playlistOriginalName]) {
+                message.channel.send('Kaede cannot find any playlists you made with the name ' + playlistOriginalName + '!');
+                return;
+            }
+            playlists[message.author.id][playlistNewName] = playlists[message.author.id][playlistOriginalName];
+            delete playlists[message.author.id][playlistOriginalName];
+            let json_format_string = JSON.stringify(playlists);
+            fs.writeFile('playlists.json', json_format_string, 'utf8', (error) => {
+                if (error) {
+                    console.log(error);
+                }
+            });
+            message.channel.send("Kaede has changed the name of playlist " + playlistOriginalName + " to " + playlistNewName + "!");
         }
     });
 }

@@ -52,6 +52,15 @@ bot.on('message', async message => {
                 }
                 else {
                     switch (arr[1]) {
+                        case "game":
+                            EmbedFunctions.gameHelpMenu(message);
+                            break;
+                        case "music":
+                            EmbedFunctions.musicHelpMenu(message);
+                            break;
+                        case "other":
+                            EmbedFunctions.otherHelpMenu(message);
+                            break;
                         default:
                             message.channel.send("in progress");
                             break;
@@ -156,7 +165,7 @@ bot.on('message', async message => {
                         MusicFunctions.addToPlaylist(message, arr);
                         break;
                     case "remove":
-                        //TBD: if possible tiff do this so get familiar
+                        MusicFunctions.removeSongFromPlaylist(message, arr[2], Number(arr[3]));
                         break;
                     case "shuffle":
                         MusicFunctions.shufflePlaylist(message, arr[2], serverQueue, queue);
@@ -168,9 +177,10 @@ bot.on('message', async message => {
                         MusicFunctions.showPlaylistSong(message, arr[2]);
                         break;
                     case "delete":
-                        MusicFunctions.deletePlaylist(message, Number(arr[2]));
+                        MusicFunctions.deletePlaylist(message, arr[2]);
                         break;
                     case "rename":
+                        MusicFunctions.renamePlaylist(message, arr[2], arr[3]);
                         break;
                     default:
                         message.channel.send("This command is not in Kaede's playlist commands!!");
