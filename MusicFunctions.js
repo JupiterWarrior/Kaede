@@ -29,7 +29,6 @@ const querystring = require('querystring');
 const entities = require('html-entities').AllHtmlEntities;
 const https = require('https');
 const fs = require('fs');
-const MiscFunctions = require('./MiscFunctions.js');
 
 /* global variables */
 var prev;
