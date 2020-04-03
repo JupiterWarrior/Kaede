@@ -674,13 +674,13 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
                 message.channel.send("Kaede cannot shuffle a playlist that is empty!");
                 return;
             }
-            playlistLength = playlists[message.author.id][playlistName].length;
-            var arrRandIndex = [];
-            while (arrRandIndex.length < playlistLength) {
-                let rand = MiscFunctions.randInt(0, playlistLength - 1);
-                if (!arrRandIndex.includes(rand)) {
-                    arrRandIndex.push(rand);
-                }
+            let playlist = playlists[message.author.id][playlistName];
+            let temp;
+            for (let i = playlist.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                temp = playlist[i];
+                playlist[i] = playlist[j];
+                playlist[j] = temp;
             }
             if (typeof serverQueue === "undefined") {
                 const queueFields = { // queuefields is the same as serverQueue.
@@ -693,35 +693,19 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
                     repeating: false,
                 };
                 queue.set(message.guild.id, queueFields);
-                for (i = 0; i < arrRandIndex.length; ++i) {
-                    queueFields.songs.push(playlists[message.author.id][playlistName][arrRandIndex[i]]);
-                }
-                //console.log(queueFields.songs);
-                message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
+            }
+            for (i = 0; i < playlist.length; ++i) {
+                serverQueue.songs.push(playlist[i]);
+            }
+            message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
+            if (!serverQueue.connection) {
                 try {
-                    var connection = await queueFields.voiceChannel.join();
-                    queueFields.connection = connection;
-                    dispatchSong(message, queueFields.songs[0], queue); 
+                    var connection = await voiceChannel.join(); // wait for Kaede to join voice channel
+                    serverQueue.connection = connection;
                 } catch (error) {
                     queue.delete(message.guild.id);
                     message.channel.send("Kaede found an error in playing the music!");
                     return;
-                }
-            }
-            else {
-                for (i = 0; i < arrRandIndex.length; ++i) {
-                    serverQueue.songs.push(playlists[message.author.id][playlistName][arrRandIndex[i]]);
-                }
-                message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
-                if (!serverQueue.connection) {
-                    try {
-                        var connection = await voiceChannel.join(); //wait for Kaede to join voice channel
-                        serverQueue.connection = connection;
-                    } catch (error) {
-                        queue.delete(message.guild.id);
-                        message.channel.send("Kaede found an error in playing the music!");
-                        return;
-                    }
                 }
             }
         }
