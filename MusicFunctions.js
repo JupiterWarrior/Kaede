@@ -1,12 +1,12 @@
 /*To do music commands:
 remove (from playlist)
-delete (delete playlist completely)
+delete (delete playlist completely) 
 rename ( rename the playlist )
 // Additional stuff
 TBD: add a next page icon for selection of songs ( make it top 15 or top 20)
 TBD: add a password and higher security level for validations of deleting playlist or renaming playlist when doing playlists function
 Idea: ASK for password through personal messaging by bot when deleting a certain playlist.
-NOTE: playlists can only be modified by the author who created it and playlists can contain no more than 30 songs.
+NOTE: playlists can only be modified by the author who created it and playlists can contain no more than 30 songs. teste
 */
 
 /**
