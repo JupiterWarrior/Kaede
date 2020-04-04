@@ -62,6 +62,7 @@ async function play(message, serverQueue, queue) {
     try {
         songInfo = await getYoutubeInfo(song); 
     } catch (error) {
+        console.log(error);
         message.channel.send("Kaede cannot find any songs with that title!");
         return;
     }
@@ -90,6 +91,7 @@ async function play(message, serverQueue, queue) {
         }
         var index = Number(collected.first().content);
     } catch (error) {
+        console.log(error);
         message.channel.send("Kaede waited too long for this!");
         return;
     }
@@ -114,7 +116,7 @@ async function play(message, serverQueue, queue) {
             queueFields.connection = connection;
             dispatchSong(message, queueFields.songs[0], queue); 
         } catch (error) {
-            //console.log(error);
+            console.log(error);
             queue.delete(message.guild.id);
             message.channel.send("Kaede found an error in playing the music!");
             return;
@@ -128,7 +130,7 @@ async function play(message, serverQueue, queue) {
                 var connection = await voiceChannel.join(); //wait for Kaede to join voice channel
                 serverQueue.connection = connection;
             } catch (error) {
-                //console.log(error);
+                console.log(error);
                 queue.delete(message.guild.id);
                 message.channel.send("Kaede found an error in playing the music!");
                 return;
@@ -167,7 +169,7 @@ async function dispatchSong(message, song, queue) {
                 clearInterval(checkPreviousInterval);
             }, 10000);
         } catch (error) {
-            //console.log(error);
+            console.log(error);
             serverQueue.voiceChannel.leave();
             queue.delete(message.guild.id);
             message.channel.send("Kaede's bored.. Leaving now!");
@@ -186,7 +188,7 @@ async function dispatchSong(message, song, queue) {
             dispatchSong(message, serverQueue.songs[0], queue);
         }).on('error', () => {
             message.channel.send("Unexpected error occured!! Kaede's scared...");
-            //console.error(error);
+            console.error(error);
         });
         dispatcher.setVolumeLogarithmic(SERVERQUEUE_LOG_VOLUME);
     }
@@ -595,6 +597,7 @@ async function addToPlaylist(message, arr) {
             try {
                 songInfo = await getYoutubeInfo(songName);
             } catch (error) {
+                console.log(error);
                 message.channel.send("Kaede cannot find any songs with that title!");
                 return;
             }
@@ -622,6 +625,7 @@ async function addToPlaylist(message, arr) {
                 }
                 var index = Number(collected.first().content);
             } catch (error){
+                console.log(error);
                 message.channel.send("Kaede waited too long for this!");
                 return;
             }
@@ -707,6 +711,7 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
                     repeating: false,
                 };
                 queue.set(message.guild.id, queueFields);
+                serverQueue = queueFields;
             }
             for (i = 0; i < playlist.length; ++i) {
                 serverQueue.songs.push(playlist[i]);
@@ -714,9 +719,11 @@ async function shufflePlaylist(message, playlistName, serverQueue, queue) {
             message.channel.send("Kaede has added all the songs from playlist " + playlistName + " to the queue!");
             if (!serverQueue.connection) {
                 try {
-                    var connection = await voiceChannel.join(); // wait for Kaede to join voice channel
+                    var connection = await serverQueue.voiceChannel.join(); // wait for Kaede to join voice channel
                     serverQueue.connection = connection;
+                    dispatchSong(message, serverQueue.songs[0], queue);
                 } catch (error) {
+                    console.log(error);
                     queue.delete(message.guild.id);
                     message.channel.send("Kaede found an error in playing the music!");
                     return;
@@ -838,6 +845,7 @@ async function deletePlaylist(message, playlistName) {
                     message.channel.send("Kaede has deleted " + playlistName + " as requested by " + message.author.username + "!");
                 }
             } catch (error) {
+                console.log(error);
                 message.channel.send("Kaede waited too long for this!");
                 return;
             }
