@@ -186,10 +186,7 @@ async function dispatchSong(message, song, queue) {
                 serverQueue.repeating = false;
             }
             dispatchSong(message, serverQueue.songs[0], queue);
-        }).on('error', () => {
-            message.channel.send("Unexpected error occured!! Kaede's scared...");
-            console.error(error);
-        });
+        })
         dispatcher.setVolumeLogarithmic(SERVERQUEUE_LOG_VOLUME);
     }
 }
