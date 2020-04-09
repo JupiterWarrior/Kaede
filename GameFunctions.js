@@ -253,3 +253,7 @@ async function blackJack(message) {
         break;
     }
 }
+
+/**
+ * mini dungeon dice game: ELBERT
+ */
