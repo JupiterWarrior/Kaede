@@ -255,8 +255,6 @@ async function blackJack(message) {
 }
 
 /**
- * REMEMBER THIS IS A WEEBO ANIME BOT! AS MUCH AS POSSIBLE PLEASE ONLY INCLUDE ANIME-RELATED QUESTIONS FOR THE SONGS AND GENERAL KNOWLEDGE CATEGORIES.
- * 
  * Trivia game! MAIN LOGIC: people join in trivia by pressing on a reaction emoji and the bot waits for 30 seconds before starting the 
  * trivia game. if nobody join within the time interval, trivia is cancelled. You can have an option of a CPU joining or not. Each trivia can hold a max
  * of 5 people joining. Each trivia round has 6 questions. And each trivia game can be played with 1, 3 or 5 rounds. There will be numerous categories, 
