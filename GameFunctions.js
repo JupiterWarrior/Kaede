@@ -255,5 +255,45 @@ async function blackJack(message) {
 }
 
 /**
- * mini dungeon dice game: ELBERT
+ * REMEMBER THIS IS A WEEBO ANIME BOT! AS MUCH AS POSSIBLE PLEASE ONLY INCLUDE ANIME-RELATED QUESTIONS FOR THE SONGS AND GENERAL KNOWLEDGE CATEGORIES.
+ * 
+ * Trivia game! MAIN LOGIC: people join in trivia by pressing on a reaction emoji and the bot waits for 30 seconds before starting the 
+ * trivia game. if nobody join within the time interval, trivia is cancelled. You can have an option of a CPU joining or not. Each trivia can hold a max
+ * of 5 people joining. Each trivia round has 6 questions. And each trivia game can be played with 1, 3 or 5 rounds. There will be numerous categories, 
+ * and each round must be a different category than one another. At the last question of each round, the points obtained will be doubled. 
+ * 
+ * Each question is multiple choice (4 or 5 choices) and lasts for 15 seconds. First person to answer will get the most points, followed by the second and so on.
+ * Trivia game also has multiple fun modes that can be added to the game. Example is: hardcore mode (10 secs each qn and negative scoring for wrong answers) 
+ * underdog boost (points every round is increased in a y = mx linear scale where m is random between 1, 2, 3 and 5), mystery category (category for each round is random), 
+ * mirror trivia (which one is the wrong answer?), etc. ADDITIONALLY, these modes can be combined together!!!
+ * 
+ * 
+ * Trivia shall not be disturbed by anything else and music shall not be played (some questions require voice channel feature. Like in songs, anime (anime op or ed) , movies)
+ * If music was playing, we will give a question to whether or not we can immediately stop the music playing. The &cancel command still applies in the middle of any trivia game round,
+ * although all participating users must agree on stopping the game then it will end, immediately determining the winner. In the middle of trivia, if 3 consecutive (consecutiveness carries over to next round) questions were left unanswered,
+ * except for CPU, then players will be considered AFK and game is cancelled (no winners). If a player is AFK ( 3 question consec) then the player will immediately be kicked out and the
+ * score will be voided. 
+ * 
+ * Any additional features or suggestions can be made by contacting me (Elbert). Enjoy in implementing the game and always to not forget to pull
+ * before modifying any code!!
+ * 
+ * Please note that questions are to be written MANUALLY in the "trivia.json" file, where the main js object have categories as its properties and each property is an array of question objects
+ * where they have the question string, an image attachment (if present) and an mp3 file (if present). (to be replaced by NULL if not present).
+ * 
  */
+
+// main trivia function to show all the categories and have a loop of rounds which calls each individual trivia function.
+async function trivia(message) {
+    // EMBED MESSAGE THAT DISPLAYS welcome to trivia message, show categories, etc.
+
+}
+
+//trivia categories : check trivia.json file.
+async function animeTrivia() {
+
+}
+
+async function songsTrivia() {
+
+}
+//etc etc add on functions.
