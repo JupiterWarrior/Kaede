@@ -276,13 +276,14 @@ async function blackJack(message) {
  * before modifying any code!!
  * 
  * Please note that questions are to be written MANUALLY in the "trivia.json" file, where the main js object have categories as its properties and each property is an array of question objects
- * where they have the question string, an image attachment (if present) and an mp3 file (if present). (to be replaced by NULL if not present).
+ * where they have the question string, an image attachment (if present) and an mp3 file (if present), and the answers. (to be replaced by NULL if not present).
  * 
  */
 
 // main trivia function to show all the categories and have a loop of rounds which calls each individual trivia function.
-async function trivia(message) {
+async function trivia(message, queue) {
     // EMBED MESSAGE THAT DISPLAYS welcome to trivia message, show categories, etc.
+    
 
 }
 

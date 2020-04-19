@@ -96,6 +96,9 @@ bot.on('message', async message => {
                             case "bjack":
                                 await GameFunctions.blackJack(message);
                                 break;
+                            case "trivia":
+                                await GameFunctions.trivia(message, queue);
+                                break;
                             default:
                                 message.channel.send("Kaede doesn't know that game!! <:illyapout:683110138235977758>");
                                 break;
