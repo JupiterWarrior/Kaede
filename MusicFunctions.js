@@ -655,7 +655,42 @@ async function addToPlaylist(message, arr) {
  * @param {Number} songIndex index of the song to be removed.
  */
 function removeSongFromPlaylist(message, playlistName, songIndex) {
- //TODO
+    if (!playlistName) {
+        message.channel.send("Kaede does not know what the name of the playlist is!");
+        return;
+    }
+    if (isNaN(songIndex) || songIndex <= 0) {
+        message.channel.send("Kaede does not know which song you want to remove!");
+        return;
+    }
+    fs.readFile('playlists.json', 'utf8', async (error, data) => {
+        if (error){
+            console.log(error);
+        } 
+        else {
+            playlists = JSON.parse(data);
+            if (!playlists[message.author.id]) {
+                message.channel.send("Kaede cannot find any playlists created by " + message.author.username + "!");
+                return;
+            }
+            if (!playlists[message.author.id][playlistName]) {
+                message.channel.send("Kaede cannot find any playlists created by " + message.author.username + " with the name " + playlistName + "!");
+                return;
+            }
+            if (songIndex > playlists[message.author.id][playlistName].length) {
+                message.channel.send("Kaede does not know which song you want to remove!");
+                return;
+            }
+            playlists[message.author.id][playlistName].splice(songIndex - 1, 1);
+            message.channel.send("Kaede remove from playlist!");
+            let json_format_string = JSON.stringify(playlists);
+            fs.writeFile('playlists.json', json_format_string, 'utf8', (error) => {
+                if (error) {
+                    console.log(error);
+                }
+            });
+        }
+    });
 }
 /**
  * Function implementation for shuffling the songs in the playlist. Works like a "batch" play where songs are added in random order from the playlist.
