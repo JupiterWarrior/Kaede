@@ -35,7 +35,7 @@ async function incrementGameWins(playerId, gameStat) {
         json = JSON.stringify(gameStatsObj);
         fs.writeFile('KaedeGameStats.json', json, 'utf8', (error) => {
             if (error) {
-                //console.log(error);
+                console.log(error);
             }
         });
     }});
@@ -65,7 +65,7 @@ async function checkForHighscore(playerId, newScore, gameStat) {
         json = JSON.stringify(gameStatsObj);
         fs.writeFile('KaedeGameStats.json', json, 'utf8', (error) => {
             if (error) {
-                //console.log(error);
+                console.log(error);
             }
         });
     }});
@@ -288,7 +288,7 @@ async function trivia(message, queue) {
         let players = [];
         // send embed message where players react to join
 
-        // 
+        //
     }
     //console.log("pass");
     

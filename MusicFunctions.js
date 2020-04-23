@@ -44,7 +44,8 @@ var prev;
 async function play(message, serverQueue, queue) {
     const song = message.content.substring(SONG_START_INDEX); //takes the string of message from excluding '^play '
     if (!song) {
-        return message.channel.send("Kaede does not know what song is to be played!");
+        message.channel.send("Kaede does not know what song is to be played!");
+        return;
     }
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) {
@@ -114,6 +115,9 @@ async function play(message, serverQueue, queue) {
         try {
             var connection = await voiceChannel.join();
             queueFields.connection = connection;
+            connection.on('disconnect', () => {
+                queue.delete(message.guild.id);
+            });
             dispatchSong(message, queueFields.songs[0], queue); 
         } catch (error) {
             console.log(error);
