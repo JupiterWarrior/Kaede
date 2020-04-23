@@ -306,28 +306,26 @@ async function songsTrivia() {
  */
 async function checkVoiceChannel(message, queue) {
     const serverQueue = queue.get(message.guild.id);
-    if (serverQueue) {
-        if (serverQueue.connection != null) {
-            message.channel.send("Kaede cannot continue with the trivia game unless music is interrupted, is it okay?");
-            const filter = m => {
-                let msg = m.content.toLowerCase();
-                let cond = msg === "yes" || msg === "no" || msg === "y" || msg === "n";
-                return cond;
-            }
-            try {
-                let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 2, errors: ['time']});
-                if (collected.first().content === "n" || collected.first().content === "no") {
-                    message.channel.send("Kaede cannot start trivia then!");
-                    return;
-                }
-                else {
-                    serverQueue.voiceChannel.leave();
-                    queue.delete(message.guild.id);
-                }
-            } catch (error) {
-                message.channel.send("Kaede waited too long for this!");
+    if (serverQueue && serverQueue.connection != null) {
+        message.channel.send("Kaede cannot continue with the trivia game unless music is interrupted, is it okay?");
+        const filter = m => {
+            let msg = m.content.toLowerCase();
+            let cond = msg === "yes" || msg === "no" || msg === "y" || msg === "n";
+            return cond;
+        }
+        try {
+            let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 2, errors: ['time']});
+            if (collected.first().content === "n" || collected.first().content === "no") {
+                message.channel.send("Kaede cannot start trivia then!");
                 return;
             }
+            else {
+                serverQueue.voiceChannel.leave();
+                queue.delete(message.guild.id);
+            }
+        } catch (error) {
+            message.channel.send("Kaede waited too long for this!");
+            return;
         }
     }
 }
