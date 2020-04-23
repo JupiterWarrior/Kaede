@@ -284,7 +284,12 @@ async function blackJack(message) {
 async function trivia(message, queue) {
     // EMBED MESSAGE THAT DISPLAYS welcome to trivia message, show categories, etc.
     //console.log("hvnt");
-    checkVoiceChannel(message, queue);
+    if (checkVoiceChannel(message, queue)) {
+        let players = [];
+        // send embed message where players react to join
+
+        // 
+    }
     //console.log("pass");
     
 }
@@ -300,7 +305,8 @@ async function songsTrivia() {
 //etc etc add on functions.
 
 /**
- * Helper function to check in start of every trivia game whether music is playing .
+ * Helper function to check in start of every trivia game whether music is playing. 
+ * Returns a boolean value representing whether music is successfully stopped.
  * @param {Object} message message object sent.
  * @param {Map<String, Object>} queue map that maps servers to its music queues.
  */
@@ -317,15 +323,17 @@ async function checkVoiceChannel(message, queue) {
             let collected = await message.channel.awaitMessages(filter, {max: 1, time : HALF_MIN / 2, errors: ['time']});
             if (collected.first().content === "n" || collected.first().content === "no") {
                 message.channel.send("Kaede cannot start trivia then!");
-                return;
+                return false;
             }
             else {
                 serverQueue.voiceChannel.leave();
                 queue.delete(message.guild.id);
+                return true;
             }
         } catch (error) {
             message.channel.send("Kaede waited too long for this!");
-            return;
+            return false;
         }
     }
+    return true;
 }
