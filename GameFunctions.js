@@ -286,14 +286,11 @@ async function trivia(message, queue) {
     // EMBED MESSAGE THAT DISPLAYS welcome to trivia message, show categories, etc.
     //console.log("hvnt");
     var triviaLobby = new Discord.MessageEmbed().setColor('#65E0F1').setTitle("Trivia Lobby").setTimestamp(Date.now()).setAuthor(
-        'Kaede', 'https://vignette.wikia.nocookie.net/aobuta/images/5/5e/Kaede_regains_original_memories.png/revision/latest?cb=20181221013117' /* if have kaede website link put here*/).setImage().setDescription(
+        'Kaede', 'https://vignette.wikia.nocookie.net/aobuta/images/5/5e/Kaede_regains_original_memories.png/revision/latest?cb=20181221013117' /* if have kaede website link put here*/).setDescription(
         'Click on the cruise ship icon to join the trivia game!').setFooter('Did you know Kaede has a website? Click on the link on Kaede\'s name!', 'https://external-preview.redd.it/PmVd8MTMoW70-aUU92H2YlHKO9ilnubtdyzVugj18vI.jpg?auto=webp&s=4150b336b0280d8934cbd3682f298c8750819273');
-    if (checkVoiceChannel(message, queue)) {
-        let players = [];
-        // send embed message where players react to join
-
-        //
-    }
+    message.channel.send(triviaLobby);
+    
+    checkVoiceChannel(message, queue);
     //console.log("pass");
     
 }
