@@ -285,11 +285,17 @@ async function blackJack(message) {
 async function trivia(message, queue) {
     // EMBED MESSAGE THAT DISPLAYS welcome to trivia message, show categories, etc.
     //console.log("hvnt");
+    const textChannel = message.channel;
     var triviaLobby = new Discord.MessageEmbed().setColor('#65E0F1').setTitle("Trivia Lobby").setTimestamp(Date.now()).setAuthor(
         'Kaede', 'https://vignette.wikia.nocookie.net/aobuta/images/5/5e/Kaede_regains_original_memories.png/revision/latest?cb=20181221013117' /* if have kaede website link put here*/).setDescription(
         'Click on the cruise ship icon to join the trivia game!').setFooter('Did you know Kaede has a website? Click on the link on Kaede\'s name!', 'https://external-preview.redd.it/PmVd8MTMoW70-aUU92H2YlHKO9ilnubtdyzVugj18vI.jpg?auto=webp&s=4150b336b0280d8934cbd3682f298c8750819273');
-    message.channel.send(triviaLobby);
-    
+    textChannel.send(triviaLobby).then(async (message) => {
+        message.react('🚢');
+        const filter = (reaction) => reaction.emoji.name === '🚢' && !message.author.bot;
+        let joiningPeople = await message.awaitReactions(filter, {time : HALF_MIN});
+        joiningPeople.last().users //get user manager then fetch it to get map of users bla bla tomorrow la
+    });
+    l
     checkVoiceChannel(message, queue);
     //console.log("pass");
     
