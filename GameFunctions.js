@@ -316,6 +316,7 @@ async function songsTrivia() {
  * Returns a boolean value representing whether music is successfully stopped.
  * @param {Object} message message object sent.
  * @param {Map<String, Object>} queue map that maps servers to its music queues.
+ * @return {Boolean} To state whether the music has been stopped or not.
  */
 async function checkVoiceChannel(message, queue) {
     const serverQueue = queue.get(message.guild.id);

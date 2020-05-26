@@ -180,7 +180,10 @@ async function dispatchSong(message, song, queue) {
             return;
         }
     } else { 
-        const dispatcher = serverQueue.connection.play(ytdl(song.url, {highWaterMark : MEGABYTES_32}));
+        const dispatcher = serverQueue.connection.play(ytdl(song.url, {
+            filter: "audioonly",
+            highWaterMark : MEGABYTES_32
+        }));
         dispatcher.on('finish', () => { 
             if (!serverQueue.looping && !serverQueue.repeating) { // on end of stream, check whether it is looping or repeating ( to check whether array is shifted or not )
                 prev = serverQueue.songs[0];
