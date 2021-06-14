@@ -2,6 +2,9 @@
 Fix bug that you can do music commands even if you're not in the same voice channel as the bot;
 Fix bug if kaede is manually disconnected, she stops playing songs and doesn't bug (and also the part where she doesnt say kaede
 's bot leaving now)
+Fix bug so that kaede still continues playing when moved to another voice channel.
+Fix long song compressed bug (watermark and all)
+Add a feature that try catches a song from playlist coz the youtube video mightve been removed.
 */
 
 /**

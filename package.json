@@ -4,10 +4,9 @@
   "description": "Bot for anime, music, mobile/console/PC game stats, calculator, translator, AI voice recognition",
   "main": "Kaede.js",
   "author": "Elbert Ng & Jamie Sebastian",
-  "side_author": "Tiffany Prayitno",
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
-    "discord.js": "^12.5.0",
+    "discord.js": "^12.5.3",
     "ffmpeg": "0.0.4",
     "opusscript": "0.0.7",
     "ytdl-core": "^2.1.7"
